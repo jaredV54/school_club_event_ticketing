@@ -1,133 +1,243 @@
 @extends('layout.main')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard - EventOps')
 
 @section('content')
-<h1>Dashboard</h1>
+@php 
+    $user = auth()->user();
+@endphp
 
-@php $user = auth()->user(); @endphp
-
-<!-- Statistics Cards for Students -->
-@if($user->role === 'student')
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <div class="fs-2 mb-2">{{ $stats['my_registrations'] }}</div>
-                <div class="text-muted small">My Registrations</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <div class="fs-2 mb-2">{{ $stats['my_attendance'] }}</div>
-                <div class="text-muted small">My Attendance</div>
-            </div>
-        </div>
-    </div>
+<!-- Page Header -->
+<div style="margin-bottom: 24px; margin-top: -56px;">
+    <h1 style="margin-bottom: 4px;">Dashboard</h1>
+    <p class="text-muted" style="font-size: 14px;">Welcome back, {{ $user->name }}</p>
 </div>
+
+<!-- KPI Tiles for Admin -->
+@if($user->role === 'admin')
+    <div class="grid-dashboard" style="margin-bottom: 24px;">
+        <x-kpi-tile 
+            label="Total Events" 
+            :value="$stats['total_events']"
+            :delta="5.3"
+            trend="up"
+        />
+        
+        <x-kpi-tile 
+            label="Total Registrations" 
+            :value="$stats['total_registrations']"
+            :delta="12.8"
+            trend="up"
+        />
+        
+        <x-kpi-tile 
+            label="Active Clubs" 
+            :value="$stats['total_clubs']"
+            :delta="0"
+            trend="neutral"
+        />
+        
+        <x-kpi-tile 
+            label="Total Users" 
+            :value="$stats['total_users']"
+            :delta="8.2"
+            trend="up"
+        />
+    </div>
 @endif
 
-<!-- Summary Information -->
-@if($user->role === 'admin' || $user->role === 'officer')
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Quick Summary</h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    @if($user->role === 'admin')
-                        <div class="col-md-3">
-                            <div class="border-end">
-                                <h3 class="text-primary">{{ $stats['total_users'] }}</h3>
-                                <p class="text-muted mb-0">Total Users</p>
-                            </div>
+<!-- KPI Tiles for Officer -->
+@if($user->role === 'officer')
+    <div class="grid-dashboard" style="margin-bottom: 24px;">
+        <x-kpi-tile 
+            label="Club Events" 
+            :value="$stats['club_events']"
+            :delta="3.5"
+            trend="up"
+        />
+        
+        <x-kpi-tile 
+            label="Club Registrations" 
+            :value="$stats['club_registrations']"
+            :delta="15.2"
+            trend="up"
+        />
+        
+        <x-kpi-tile 
+            label="Attendance Records" 
+            :value="$stats['club_attendance']"
+            :delta="7.1"
+            trend="up"
+        />
+    </div>
+@endif
+
+<!-- KPI Tiles for Student -->
+@if($user->role === 'student')
+    <div class="grid-dashboard" style="margin-bottom: 24px;">
+        <x-kpi-tile 
+            label="My Registrations" 
+            :value="$stats['my_registrations']"
+        />
+        
+        <x-kpi-tile 
+            label="My Attendance" 
+            :value="$stats['my_attendance']"
+        />
+    </div>
+@endif
+
+<!-- Content Cards -->
+<div class="grid-dashboard">
+    <!-- Recent Events Card -->
+    <x-card title="{{ $user->role === 'officer' ? 'Club Events' : 'Recent Events' }}">
+        <x-slot:actions>
+            <a href="{{ route('events.index') }}" style="font-size: 14px; color: var(--color-primary-600); font-weight: 500;">
+                View all
+            </a>
+        </x-slot:actions>
+        
+        @forelse($recent_events->take(5) as $event)
+            <div style="padding: 12px 0; {{ !$loop->last ? 'border-bottom: 1px solid var(--color-border-subtle);' : '' }}">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 500; color: var(--color-text-heading); margin-bottom: 4px;">
+                            {{ $event->title }}
                         </div>
-                        <div class="col-md-3">
-                            <div class="border-end">
-                                <h3 class="text-success">{{ $stats['total_clubs'] }}</h3>
-                                <p class="text-muted mb-0">Active Clubs</p>
-                            </div>
+                        <div style="font-size: 12px; color: var(--color-text-muted);">
+                            {{ $event->club->name }} • {{ $event->date->format('M d, Y') }}
                         </div>
-                        <div class="col-md-3">
-                            <div class="border-end">
-                                <h3 class="text-info">{{ $stats['total_events'] }}</h3>
-                                <p class="text-muted mb-0">Total Events</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <h3 class="text-warning">{{ $stats['total_registrations'] }}</h3>
-                            <p class="text-muted mb-0">Total Registrations</p>
-                        </div>
-                    @elseif($user->role === 'officer')
-                        <div class="col-md-4">
-                            <div class="border-end">
-                                <h3 class="text-primary">{{ $stats['club_events'] }}</h3>
-                                <p class="text-muted mb-0">Club Events</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border-end">
-                                <h3 class="text-success">{{ $stats['club_registrations'] }}</h3>
-                                <p class="text-muted mb-0">Club Registrations</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <h3 class="text-info">{{ $stats['club_attendance'] }}</h3>
-                            <p class="text-muted mb-0">Attendance Records</p>
-                        </div>
+                    </div>
+                    @if($user->role !== 'student')
+                        <a href="{{ route('events.show', $event) }}" class="btn btn-secondary btn-sm">
+                            Manage
+                        </a>
                     @endif
                 </div>
             </div>
-        </div>
-    </div>
+        @empty
+            <div style="text-align: center; padding: 32px 16px;">
+                <i class='bx bx-calendar' style="font-size: 48px; color: var(--color-text-muted); margin-bottom: 12px;"></i>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 16px;">
+                    No events yet
+                </div>
+                @if($user->role !== 'student')
+                    <x-button variant="primary" size="sm" href="{{ route('events.create') }}">
+                        <i class='bx bx-plus'></i>
+                        <span>Create Event</span>
+                    </x-button>
+                @endif
+            </div>
+        @endforelse
+    </x-card>
+    
+    <!-- Recent Registrations Card -->
+    <x-card title="{{ $user->role === 'student' ? 'My Registrations' : ($user->role === 'officer' ? 'Club Registrations' : 'Recent Registrations') }}">
+        <x-slot:actions>
+            <a href="{{ route('registrations.index') }}" style="font-size: 14px; color: var(--color-primary-600); font-weight: 500;">
+                View all
+            </a>
+        </x-slot:actions>
+        
+        @forelse($recent_registrations->take(5) as $registration)
+            <div style="padding: 12px 0; {{ !$loop->last ? 'border-bottom: 1px solid var(--color-border-subtle);' : '' }}">
+                <div style="display: flex; align-items: start; gap: 12px;">
+                    <!-- Avatar -->
+                    <div class="user-avatar" style="flex-shrink: 0;">
+                        {{ strtoupper(substr($registration->user->name, 0, 1)) }}
+                    </div>
+                    
+                    <!-- Content -->
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 500; color: var(--color-text-heading); margin-bottom: 2px;">
+                            {{ $registration->user->name }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--color-text-muted);">
+                            {{ $registration->event->title }}
+                        </div>
+                    </div>
+                    
+                    <!-- Timestamp -->
+                    <div style="font-size: 12px; color: var(--color-text-muted); flex-shrink: 0;">
+                        {{ $registration->created_at->diffForHumans() }}
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div style="text-align: center; padding: 32px 16px;">
+                <i class='bx bx-receipt' style="font-size: 48px; color: var(--color-text-muted); margin-bottom: 12px;"></i>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 16px;">
+                    @if($user->role === 'student')
+                        No registrations yet
+                    @else
+                        No registrations yet
+                    @endif
+                </div>
+                @if($user->role === 'student')
+                    <x-button variant="primary" size="sm" href="{{ route('registrations.create') }}">
+                        <i class='bx bx-plus'></i>
+                        <span>Register for Event</span>
+                    </x-button>
+                @endif
+            </div>
+        @endforelse
+    </x-card>
+    
+    @if($user->role === 'admin')
+        <!-- Quick Stats Card -->
+        <x-card title="Quick Summary">
+            <div style="display: grid; gap: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px;">Total Attendance</div>
+                        <div style="font-size: 20px; font-weight: 600; color: var(--color-text-heading);">{{ $stats['total_attendance'] }}</div>
+                    </div>
+                    <i class='bx bx-check-circle' style="font-size: 32px; color: var(--color-success-600);"></i>
+                </div>
+                
+                <div style="padding-top: 16px; border-top: 1px solid var(--color-border-subtle);">
+                    <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px;">System Status</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <x-badge variant="success">All Systems Operational</x-badge>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+        
+        <!-- Capacity Overview Card -->
+        <x-card title="Capacity Overview">
+            @php
+                $topEvents = $recent_events->take(3);
+            @endphp
+            
+            @forelse($topEvents as $event)
+                @php
+                    $soldSeats = $event->registrations->count();
+                    $percentage = $event->capacity > 0 ? ($soldSeats / $event->capacity) * 100 : 0;
+                @endphp
+                
+                <div style="margin-bottom: {{ !$loop->last ? '16px' : '0' }};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div style="font-size: 13px; font-weight: 500; color: var(--color-text-heading);">
+                            {{ Str::limit($event->title, 30) }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--color-text-muted);">
+                            {{ $soldSeats }}/{{ $event->capacity }}
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="width: 100%; height: 6px; background-color: var(--color-page-bg); overflow: hidden;">
+                        <div style="height: 100%; background-color: {{ $percentage >= 90 ? 'var(--color-danger-600)' : ($percentage >= 70 ? 'var(--color-warning-600)' : 'var(--color-success-600)') }}; width: {{ min($percentage, 100) }}%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+            @empty
+                <div style="text-align: center; padding: 16px; color: var(--color-text-muted); font-size: 14px;">
+                    No events to display
+                </div>
+            @endforelse
+        </x-card>
+    @endif
 </div>
-@endif
 
-<!-- Recent Activity -->
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    @if($user->role === 'officer') Club Events @else Recent Events @endif
-                </h5>
-            </div>
-            <div class="card-body">
-                @forelse($recent_events as $event)
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="fw-bold">{{ $event->title }}</div>
-                        <small class="text-muted">{{ $event->club->name }} • {{ $event->date->format('M d, Y') }}</small>
-                    </div>
-                @empty
-                    <p class="text-muted mb-0">No events yet.</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    @if($user->role === 'student') My Registrations @elseif($user->role === 'officer') Club Registrations @else Recent Registrations @endif
-                </h5>
-            </div>
-            <div class="card-body">
-                @forelse($recent_registrations as $registration)
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="fw-bold">{{ $registration->user->name }}</div>
-                        <small class="text-muted">{{ $registration->event->title }} • {{ $registration->created_at->format('M d, Y') }}</small>
-                    </div>
-                @empty
-                    <p class="text-muted mb-0">
-                        @if($user->role === 'student') No registrations yet. @else No registrations yet. @endif
-                    </p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-</div>
 @endsection

@@ -19,6 +19,11 @@ class Club extends Model
         return $this->hasMany(Event::class);
     }
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
     public function officers()
     {
         return $this->hasMany(User::class)->where('role', 'officer');

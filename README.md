@@ -1,59 +1,139 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# School Club Event Ticketing System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based web application for managing school clubs, events, user registrations, and attendance tracking. This system allows students and officers to create and manage clubs, organize events, handle registrations, and track attendance.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **User Management**: Role-based access for students, officers, and administrators
+- **Club Management**: Create and manage school clubs with officer assignments
+- **Event Management**: Organize events with registration capabilities
+- **Registration System**: Students can register for events
+- **Attendance Tracking**: Log and manage attendance for events
+- **Dashboard**: Overview of system statistics and activities
+- **Responsive UI**: Built with TailwindCSS and Blade templates
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Prerequisites
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Before you begin, ensure you have the following installed on your system:
 
-## Learning Laravel
+- **PHP 8.2 or higher**
+- **Composer** (PHP dependency manager)
+- **Node.js 16+ and npm** (for frontend assets)
+- **SQLite** (default database, or configure MySQL/PostgreSQL if preferred)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone the repository:**
+   ```bash
+   git clone <your-github-repo-url>
+   cd school_club_event_ticketing
+   ```
 
-## Laravel Sponsors
+2. **Install PHP dependencies:**
+   ```bash
+   composer install
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Install Node.js dependencies:**
+   ```bash
+   npm install
+   ```
 
-### Premium Partners
+4. **Environment Configuration:**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` to configure your database and other settings which is MySQL. By default, it uses SQLite.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Generate Application Key:**
+   ```bash
+   php artisan key:generate
+   ```
+
+6. **Run Database Migrations:**
+   ```bash
+   php artisan migrate
+   ```
+
+7. **Seed the Database (Optional - adds sample data):**
+   ```bash
+   php artisan db:seed
+   ```
+
+8. **Build Frontend Assets:**
+   ```bash
+   npm run build
+   ```
+
+   > **Note:** `npm install` is required to install Node.js dependencies before building. For development, you can skip `npm run build` and use `composer run dev` instead, which runs Vite's development server with hot reloading.
+
+## Running the Application
+
+### Development Mode
+To run the application in development mode with hot reloading:
+```bash
+composer run dev
+```
+This will start the Laravel server, queue worker, logs, and Vite dev server concurrently.
+
+### Production Mode
+For production, build the assets and serve:
+```bash
+npm run build
+php artisan serve
+```
+
+The application will be available at `http://localhost:8000`
+
+## Quick Setup (Using Composer Script)
+
+Alternatively, you can use the built-in setup script:
+```bash
+composer run setup
+```
+This will install dependencies, copy environment file, generate key, run migrations, install npm packages, and build assets.
+
+## Database Configuration
+
+The application is configured to use SQLite by default for simplicity. The database file will be created at `database/database.sqlite`.
+
+To use MySQL or PostgreSQL instead:
+1. Update `DB_CONNECTION` in `.env`
+2. Configure the corresponding database credentials
+3. Run migrations
+
+## User Roles
+
+- **Student**: Can view events, register for events, view their attendance
+- **Officer**: Can manage their assigned club, create events, manage registrations, track attendance
+- **Admin**: Full system access (if implemented)
+
+## Technologies Used
+
+- **Laravel 12**: PHP framework
+- **TailwindCSS 4**: Utility-first CSS framework
+- **Vite**: Frontend build tool
+- **Blade Templates**: Server-side templating
+- **SQLite/MySQL/PostgreSQL**: Database options
+- **Axios**: HTTP client for AJAX requests
+
+## Project Structure
+
+- `app/Http/Controllers/`: Application controllers
+- `app/Models/`: Eloquent models
+- `resources/views/`: Blade templates
+- `routes/`: Route definitions
+- `database/migrations/`: Database schema
+- `database/seeders/`: Database seeders for sample data
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `composer run test`
+5. Submit a pull request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

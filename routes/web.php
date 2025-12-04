@@ -34,29 +34,29 @@ Route::middleware('auth')->group(function () {
     });
 
     // Events - accessible by admin, officer, and student with different permissions
-    Route::get('events', [EventController::class, 'index'])->name('events.index');
-    Route::get('events/create', [EventController::class, 'create'])->name('events.create')->middleware('role:admin,officer');
-    Route::post('events', [EventController::class, 'store'])->name('events.store')->middleware('role:admin,officer');
-    Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
-    Route::get('events/{event}/edit', [EventController::class, 'edit'])->name('events.edit')->middleware('role:admin,officer');
-    Route::put('events/{event}', [EventController::class, 'update'])->name('events.update')->middleware('role:admin,officer');
-    Route::delete('events/{event}', [EventController::class, 'destroy'])->name('events.destroy')->middleware('role:admin,officer');
+    Route::get('events', [EventController::class, 'index'])->name('events.index')->middleware('officer.club');
+    Route::get('events/create', [EventController::class, 'create'])->name('events.create')->middleware(['role:admin,officer', 'officer.club']);
+    Route::post('events', [EventController::class, 'store'])->name('events.store')->middleware(['role:admin,officer', 'officer.club']);
+    Route::get('events/{event}', [EventController::class, 'show'])->name('events.show')->middleware('officer.club');
+    Route::get('events/{event}/edit', [EventController::class, 'edit'])->name('events.edit')->middleware(['role:admin,officer', 'officer.club']);
+    Route::put('events/{event}', [EventController::class, 'update'])->name('events.update')->middleware(['role:admin,officer', 'officer.club']);
+    Route::delete('events/{event}', [EventController::class, 'destroy'])->name('events.destroy')->middleware(['role:admin,officer', 'officer.club']);
 
     // Registrations - different access for different roles
-    Route::get('registrations', [RegistrationController::class, 'index'])->name('registrations.index');
+    Route::get('registrations', [RegistrationController::class, 'index'])->name('registrations.index')->middleware('officer.club');
     Route::get('registrations/create', [RegistrationController::class, 'create'])->name('registrations.create')->middleware('role:admin,student');
     Route::post('registrations', [RegistrationController::class, 'store'])->name('registrations.store')->middleware('role:admin,student');
-    Route::get('registrations/{registration}', [RegistrationController::class, 'show'])->name('registrations.show');
+    Route::get('registrations/{registration}', [RegistrationController::class, 'show'])->name('registrations.show')->middleware('officer.club');
     Route::get('registrations/{registration}/edit', [RegistrationController::class, 'edit'])->name('registrations.edit')->middleware('role:admin');
     Route::put('registrations/{registration}', [RegistrationController::class, 'update'])->name('registrations.update')->middleware('role:admin');
     Route::delete('registrations/{registration}', [RegistrationController::class, 'destroy'])->name('registrations.destroy')->middleware('role:admin');
 
     // Attendance - accessible by all roles with different permissions
-    Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('attendance/create', [AttendanceController::class, 'create'])->name('attendance.create')->middleware('role:admin,officer');
-    Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store')->middleware('role:admin,officer');
-    Route::get('attendance/{attendance}', [AttendanceController::class, 'show'])->name('attendance.show');
-    Route::get('attendance/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendance.edit')->middleware('role:admin');
-    Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update')->middleware('role:admin');
-    Route::delete('attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy')->middleware('role:admin');
+    Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index')->middleware('officer.club');
+    Route::get('attendance/create', [AttendanceController::class, 'create'])->name('attendance.create')->middleware(['role:admin,officer', 'officer.club']);
+    Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store')->middleware(['role:admin,officer', 'officer.club']);
+    Route::get('attendance/{attendance}', [AttendanceController::class, 'show'])->name('attendance.show')->middleware('officer.club');
+    Route::get('attendance/{attendance}/edit', [AttendanceController::class, 'edit'])->name('attendance.edit')->middleware(['role:admin', 'officer.club']);
+    Route::put('attendance/{attendance}', [AttendanceController::class, 'update'])->name('attendance.update')->middleware(['role:admin', 'officer.club']);
+    Route::delete('attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy')->middleware(['role:admin', 'officer.club']);
 });

@@ -3,108 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - School Club Event Ticketing</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Register - EventOps</title>
+    
+    <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        body {
-            background-color: #0a0a0a;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            color: #e9ecef;
-        }
-        .card {
-            background-color: #1a1a1a;
-            border: 1px solid #2d2d2d;
-            border-radius: 1rem;
-            box-shadow: 0 1rem 3rem rgba(0,0,0,0.3);
-            color: #e9ecef;
-        }
-        .form-control {
-            background-color: #2d2d2d;
-            border: 1px solid #404040;
-            color: #e9ecef;
-        }
-        .form-control:focus {
-            background-color: #2d2d2d;
-            border-color: #6c757d;
-            color: #e9ecef;
-            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
-        }
-        .btn-primary {
-            background-color: #495057;
-            border-color: #495057;
-            border-radius: 0.5rem;
-        }
-        .btn-primary:hover {
-            background-color: #343a40;
-            border-color: #343a40;
-        }
-        .text-muted {
-            color: #adb5bd !important;
-        }
-    </style>
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class='bx bx-user-plus text-primary fs-1 mb-3'></i>
-                            <h2 class="fw-bold">Create Account</h2>
-                            <p class="text-muted">Join our school club event community</p>
-                        </div>
-                        <form method="POST" action="{{ route('register') }}">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="name" class="form-label fw-bold">Full Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bx-user'></i></span>
-                                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label fw-bold">Email Address</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bx-envelope'></i></span>
-                                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required>
-                                    </div>
-                                </div>
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div style="width: 100%; max-width: 600px;">
+            <!-- Logo and Title -->
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background-color: var(--color-primary-50); margin-bottom: 16px;">
+                    <i class='bx bx-user-plus' style="font-size: 32px; color: var(--color-primary-600);"></i>
+                </div>
+                <h1 style="font-size: 24px; font-weight: 700; color: var(--color-text-heading); margin-bottom: 8px;">
+                    Create Account
+                </h1>
+                <p style="font-size: 14px; color: var(--color-text-muted);">
+                    Join our school club event community
+                </p>
+            </div>
+
+            <!-- Register Card -->
+            <div class="card" style="padding: 32px;">
+                @if($errors->any())
+                    <div class="alert alert-danger" style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: start; gap: 8px;">
+                            <i class='bx bx-error-circle' style="font-size: 20px; margin-top: 2px;"></i>
+                            <div>
+                                @foreach($errors->all() as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label fw-bold">Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bx-lock'></i></span>
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="password_confirmation" class="form-label fw-bold">Confirm Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bx-lock-alt'></i></span>
-                                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                                <i class='bx bx-user-plus me-2'></i>Create Account
-                            </button>
-                        </form>
-                        <div class="text-center">
-                            <p class="mb-0">Already have an account?
-                                <a href="{{ route('login') }}" class="text-decoration-none fw-bold">Sign in here</a>
-                            </p>
                         </div>
                     </div>
+                @endif
+
+                <form method="POST" action="{{ route('register') }}">
+                    @csrf
+                    
+                    <!-- Name and Email Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                        <!-- Full Name -->
+                        <div>
+                            <label for="name" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                                Full Name <span style="color: var(--color-danger-600);">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <input 
+                                    type="text" 
+                                    class="input" 
+                                    id="name" 
+                                    name="name" 
+                                    value="{{ old('name') }}" 
+                                    placeholder="Enter your full name"
+                                    required
+                                    style="padding-left: 40px;"
+                                >
+                                <i class='bx bx-user' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label for="email" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                                Email Address <span style="color: var(--color-danger-600);">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <input 
+                                    type="email" 
+                                    class="input" 
+                                    id="email" 
+                                    name="email" 
+                                    value="{{ old('email') }}" 
+                                    placeholder="Enter your email"
+                                    required
+                                    style="padding-left: 40px;"
+                                >
+                                <i class='bx bx-envelope' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <!-- Password -->
+                        <div>
+                            <label for="password" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                                Password <span style="color: var(--color-danger-600);">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <input 
+                                    type="password" 
+                                    class="input" 
+                                    id="password" 
+                                    name="password" 
+                                    placeholder="Create a password"
+                                    required
+                                    style="padding-left: 40px;"
+                                >
+                                <i class='bx bx-lock' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div>
+                            <label for="password_confirmation" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                                Confirm Password <span style="color: var(--color-danger-600);">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <input 
+                                    type="password" 
+                                    class="input" 
+                                    id="password_confirmation" 
+                                    name="password_confirmation" 
+                                    placeholder="Confirm your password"
+                                    required
+                                    style="padding-left: 40px;"
+                                >
+                                <i class='bx bx-lock-alt' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <x-button type="submit" variant="primary" style="width: 100%; justify-content: center;">
+                        <i class='bx bx-user-plus'></i>
+                        <span>Create Account</span>
+                    </x-button>
+                </form>
+
+                <!-- Login Link -->
+                <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border-subtle);">
+                    <p style="font-size: 14px; color: var(--color-text-muted); margin: 0;">
+                        Already have an account? 
+                        <a href="{{ route('login') }}" style="color: var(--color-primary-600); font-weight: 500; text-decoration: none;">
+                            Sign in here
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

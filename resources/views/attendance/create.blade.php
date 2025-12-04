@@ -1,35 +1,92 @@
 @extends('layout.main')
 
-@section('title', 'Create Attendance Log')
+@section('title', 'Mark Attendance - EventOps')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h4>Create Attendance Log</h4>
+<div style="max-width: 700px; margin: 0 auto;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 24px;">
+        <h1 style="margin-bottom: 4px;">Mark Attendance</h1>
+        <p class="text-muted" style="font-size: 14px;">Record student attendance for an event</p>
+    </div>
+
+    <!-- Attendance Form Card -->
+    <x-card>
+        <form method="POST" action="{{ route('attendance.store') }}">
+            @csrf
+            
+            <!-- Registration Selection -->
+            <div style="margin-bottom: 20px;">
+                <label for="registration_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Select Registration <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <select 
+                    class="input" 
+                    id="registration_id" 
+                    name="registration_id" 
+                    required
+                    style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                >
+                    <option value="">Select a registration</option>
+                    @foreach($registrations as $registration)
+                        <option value="{{ $registration->id }}" {{ old('registration_id') == $registration->id ? 'selected' : '' }}>
+                            {{ $registration->event->title }} - {{ $registration->user->name }} ({{ $registration->ticket_code }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('registration_id')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+                <p style="margin-top: 4px; font-size: 12px; color: var(--color-text-muted);">
+                    Choose the student and event to mark attendance
+                </p>
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ route('attendance.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="registration_id" class="form-label">Registration</label>
-                        <select class="form-select" id="registration_id" name="registration_id" required>
-                            <option value="">Select Registration</option>
-                            @foreach($registrations as $registration)
-                                <option value="{{ $registration->id }}" {{ old('registration_id') == $registration->id ? 'selected' : '' }}>
-                                    {{ $registration->event->title }} - {{ $registration->user->name }} ({{ $registration->ticket_code }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="timestamp" class="form-label">Timestamp</label>
-                        <input type="datetime-local" class="form-control" id="timestamp" name="timestamp" value="{{ old('timestamp', now()->format('Y-m-d\TH:i')) }}" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Log</button>
-                    <a href="{{ route('attendance.index') }}" class="btn btn-secondary">Cancel</a>
-                </form>
+
+            <!-- Timestamp -->
+            <div style="margin-bottom: 20px;">
+                <label for="timestamp" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Check-in Time <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <input 
+                    type="datetime-local" 
+                    class="input" 
+                    id="timestamp" 
+                    name="timestamp" 
+                    value="{{ old('timestamp', now()->format('Y-m-d\TH:i')) }}" 
+                    required
+                >
+                @error('timestamp')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+                <p style="margin-top: 4px; font-size: 12px; color: var(--color-text-muted);">
+                    Default is current date and time
+                </p>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
+                <x-button type="submit" variant="primary" style="flex: 1;">
+                    <i class='bx bx-check-circle'></i>
+                    <span>Mark Attendance</span>
+                </x-button>
+                <x-button type="button" variant="secondary" href="{{ route('attendance.index') }}">
+                    Cancel
+                </x-button>
+            </div>
+        </form>
+    </x-card>
+
+    <!-- Info Card -->
+    <div style="margin-top: 16px; padding: 16px; background-color: var(--color-info-bg); border: 1px solid var(--color-info-600); color: var(--color-info-text); font-size: 14px;">
+        <div style="display: flex; gap: 12px;">
+            <i class='bx bx-info-circle' style="font-size: 20px; flex-shrink: 0;"></i>
+            <div>
+                <strong style="display: block; margin-bottom: 4px;">Attendance Guidelines</strong>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Verify the student's ticket code before marking attendance</li>
+                    <li>Ensure the timestamp reflects the actual check-in time</li>
+                    <li>Attendance can only be marked once per registration</li>
+                </ul>
             </div>
         </div>
     </div>

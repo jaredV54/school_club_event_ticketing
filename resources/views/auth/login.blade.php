@@ -3,90 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - School Club Event Ticketing</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Login - EventOps</title>
+    
+    <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        body {
-            background-color: #0a0a0a;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            color: #e9ecef;
-        }
-        .card {
-            background-color: #1a1a1a;
-            border: 1px solid #2d2d2d;
-            border-radius: 1rem;
-            box-shadow: 0 1rem 3rem rgba(0,0,0,0.3);
-            color: #e9ecef;
-        }
-        .form-control {
-            background-color: #2d2d2d;
-            border: 1px solid #404040;
-            color: #e9ecef;
-        }
-        .form-control:focus {
-            background-color: #2d2d2d;
-            border-color: #6c757d;
-            color: #e9ecef;
-            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
-        }
-        .btn-primary {
-            background-color: #495057;
-            border-color: #495057;
-            border-radius: 0.5rem;
-        }
-        .btn-primary:hover {
-            background-color: #343a40;
-            border-color: #343a40;
-        }
-        .text-muted {
-            color: #adb5bd !important;
-        }
-    </style>
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="card">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class='bx bx-calendar-event text-primary fs-1 mb-3'></i>
-                            <h2 class="fw-bold">Welcome Back</h2>
-                            <p class="text-muted">Sign in to your account</p>
-                        </div>
-                        <form method="POST" action="{{ route('login') }}">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="email" class="form-label fw-bold">Email Address</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class='bx bx-envelope'></i></span>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required>
-                                </div>
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div style="width: 100%; max-width: 440px;">
+            <!-- Logo and Title -->
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background-color: var(--color-primary-50); margin-bottom: 16px;">
+                    <i class='bx bx-calendar-event' style="font-size: 32px; color: var(--color-primary-600);"></i>
+                </div>
+                <h1 style="font-size: 24px; font-weight: 700; color: var(--color-text-heading); margin-bottom: 8px;">
+                    Welcome Back
+                </h1>
+                <p style="font-size: 14px; color: var(--color-text-muted);">
+                    Sign in to EventOps
+                </p>
+            </div>
+
+            <!-- Login Card -->
+            <div class="card" style="padding: 32px;">
+                @if($errors->any())
+                    <div class="alert alert-danger" style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: start; gap: 8px;">
+                            <i class='bx bx-error-circle' style="font-size: 20px; margin-top: 2px;"></i>
+                            <div>
+                                @foreach($errors->all() as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label fw-bold">Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class='bx bx-lock'></i></span>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                                <i class='bx bx-log-in me-2'></i>Sign In
-                            </button>
-                        </form>
-                        <div class="text-center">
-                            <p class="mb-0">Don't have an account?
-                                <a href="{{ route('register') }}" class="text-decoration-none fw-bold">Sign up here</a>
-                            </p>
                         </div>
                     </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    
+                    <!-- Email -->
+                    <div style="margin-bottom: 20px;">
+                        <label for="email" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Email Address <span style="color: var(--color-danger-600);">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <input 
+                                type="email" 
+                                class="input" 
+                                id="email" 
+                                name="email" 
+                                value="{{ old('email') }}" 
+                                placeholder="Enter your email"
+                                required
+                                style="padding-left: 40px;"
+                            >
+                            <i class='bx bx-envelope' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div style="margin-bottom: 24px;">
+                        <label for="password" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Password <span style="color: var(--color-danger-600);">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <input 
+                                type="password" 
+                                class="input" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Enter your password"
+                                required
+                                style="padding-left: 40px;"
+                            >
+                            <i class='bx bx-lock' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <x-button type="submit" variant="primary" style="width: 100%; justify-content: center;">
+                        <i class='bx bx-log-in'></i>
+                        <span>Sign In</span>
+                    </x-button>
+                </form>
+
+                <!-- Register Link -->
+                <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border-subtle);">
+                    <p style="font-size: 14px; color: var(--color-text-muted); margin: 0;">
+                        Don't have an account? 
+                        <a href="{{ route('register') }}" style="color: var(--color-primary-600); font-weight: 500; text-decoration: none;">
+                            Sign up here
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

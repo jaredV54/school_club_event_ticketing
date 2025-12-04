@@ -1,69 +1,190 @@
 @extends('layout.main')
 
-@section('title', 'Create Event')
+@section('title', 'Create Event - EventOps')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h4>Create Event</h4>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ route('events.store') }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="club_id" class="form-label">Club</label>
-                        <select class="form-select" id="club_id" name="club_id" required>
-                            <option value="">Select Club</option>
-                            @foreach($clubs as $club)
-                                <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>
-                                    {{ $club->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required>{{ old('description') }}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="venue" class="form-label">Venue</label>
-                        <input type="text" class="form-control" id="venue" name="venue" value="{{ old('venue') }}" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="date" class="form-label">Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ old('date') }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="time_start" class="form-label">Start Time</label>
-                                <input type="time" class="form-control" id="time_start" name="time_start" value="{{ old('time_start') }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="time_end" class="form-label">End Time</label>
-                                <input type="time" class="form-control" id="time_end" name="time_end" value="{{ old('time_end') }}" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="capacity" class="form-label">Capacity</label>
-                        <input type="number" class="form-control" id="capacity" name="capacity" value="{{ old('capacity', 100) }}" min="1" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Event</button>
-                    <a href="{{ route('events.index') }}" class="btn btn-secondary">Cancel</a>
-                </form>
-            </div>
-        </div>
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 24px;">
+        <h1 style="margin-bottom: 4px;">Create Event</h1>
+        <p class="text-muted" style="font-size: 14px;">Fill in the details to create a new event</p>
     </div>
+
+    <!-- Event Form Card -->
+    <x-card>
+        <form method="POST" action="{{ route('events.store') }}">
+            @csrf
+            
+            <!-- Club Selection -->
+            <div style="margin-bottom: 20px;">
+                <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Club <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <select 
+                    class="input" 
+                    id="club_id" 
+                    name="club_id" 
+                    required
+                    style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                >
+                    <option value="">Select a club</option>
+                    @foreach($clubs as $club)
+                        <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>
+                            {{ $club->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('club_id')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Title -->
+            <div style="margin-bottom: 20px;">
+                <label for="title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Event Title <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    class="input" 
+                    id="title" 
+                    name="title" 
+                    value="{{ old('title') }}" 
+                    placeholder="Enter event title"
+                    required
+                >
+                @error('title')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Description -->
+            <div style="margin-bottom: 20px;">
+                <label for="description" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Description <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <textarea 
+                    class="input" 
+                    id="description" 
+                    name="description" 
+                    rows="4" 
+                    placeholder="Describe your event"
+                    required
+                    style="resize: vertical; min-height: 100px;"
+                >{{ old('description') }}</textarea>
+                @error('description')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Venue -->
+            <div style="margin-bottom: 20px;">
+                <label for="venue" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Venue <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    class="input" 
+                    id="venue" 
+                    name="venue" 
+                    value="{{ old('venue') }}" 
+                    placeholder="Enter venue location"
+                    required
+                >
+                @error('venue')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Date and Time Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <!-- Date -->
+                <div>
+                    <label for="date" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Date <span style="color: var(--color-danger-600);">*</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        class="input" 
+                        id="date" 
+                        name="date" 
+                        value="{{ old('date') }}" 
+                        required
+                    >
+                    @error('date')
+                        <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Start Time -->
+                <div>
+                    <label for="time_start" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Start Time <span style="color: var(--color-danger-600);">*</span>
+                    </label>
+                    <input 
+                        type="time" 
+                        class="input" 
+                        id="time_start" 
+                        name="time_start" 
+                        value="{{ old('time_start') }}" 
+                        required
+                    >
+                    @error('time_start')
+                        <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- End Time -->
+                <div>
+                    <label for="time_end" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        End Time <span style="color: var(--color-danger-600);">*</span>
+                    </label>
+                    <input 
+                        type="time" 
+                        class="input" 
+                        id="time_end" 
+                        name="time_end" 
+                        value="{{ old('time_end') }}" 
+                        required
+                    >
+                    @error('time_end')
+                        <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Capacity -->
+            <div style="margin-bottom: 20px;">
+                <label for="capacity" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                    Capacity <span style="color: var(--color-danger-600);">*</span>
+                </label>
+                <input 
+                    type="number" 
+                    class="input" 
+                    id="capacity" 
+                    name="capacity" 
+                    value="{{ old('capacity', 100) }}" 
+                    min="1" 
+                    placeholder="Maximum number of attendees"
+                    required
+                    style="max-width: 200px;"
+                >
+                @error('capacity')
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--color-danger-600);">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Form Actions -->
+            <div style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
+                <x-button type="submit" variant="primary" style="flex: 1;">
+                    <i class='bx bx-check'></i>
+                    <span>Create Event</span>
+                </x-button>
+                <x-button type="button" variant="secondary" href="{{ route('events.index') }}">
+                    Cancel
+                </x-button>
+            </div>
+        </form>
+    </x-card>
 </div>
 @endsection

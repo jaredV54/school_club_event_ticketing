@@ -9,10 +9,31 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return view('users.index', compact('users'));
+        $query = User::with('club');
+
+        // Apply filters
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->email . '%');
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('club_id')) {
+            $query->where('club_id', $request->club_id);
+        }
+
+        $users = $query->get();
+        $clubs = \App\Models\Club::all();
+
+        return view('users.index', compact('users', 'clubs'));
     }
 
     public function create()

@@ -7,9 +7,45 @@ use Illuminate\Http\Request;
 
 class ClubController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clubs = Club::all();
+        $query = Club::with('events', 'users');
+
+        // Apply filters
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('description')) {
+            $query->where('description', 'like', '%' . $request->description . '%');
+        }
+
+        if ($request->filled('events_min')) {
+            $query->has('events', '>=', $request->events_min);
+        }
+
+        if ($request->filled('events_max')) {
+            $query->has('events', '<=', $request->events_max);
+        }
+
+        if ($request->filled('members_min')) {
+            $query->has('users', '>=', $request->members_min);
+        }
+
+        if ($request->filled('members_max')) {
+            $query->has('users', '<=', $request->members_max);
+        }
+
+        if ($request->filled('created_from')) {
+            $query->where('created_at', '>=', $request->created_from . ' 00:00:00');
+        }
+
+        if ($request->filled('created_to')) {
+            $query->where('created_at', '<=', $request->created_to . ' 23:59:59');
+        }
+
+        $clubs = $query->get();
+
         return view('clubs.index', compact('clubs'));
     }
 
