@@ -43,29 +43,25 @@ Before you begin, ensure you have the following installed on your system:
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` to configure your database and other settings which is MySQL. By default, it uses SQLite.
-
-5. **Generate Application Key:**
-   ```bash
-   php artisan key:generate
+   Edit `.env` and configure the database settings for MySQL:
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=school_club_event_ticketing
+   DB_USERNAME=root
+   DB_PASSWORD=
    ```
 
-6. **Run Database Migrations:**
+5. **Run Database Migrations:**
    ```bash
    php artisan migrate
    ```
 
-7. **Seed the Database (Optional - adds sample data):**
+6. **Seed the Database (Optional - adds sample data):**
    ```bash
    php artisan db:seed
    ```
-
-8. **Build Frontend Assets:**
-   ```bash
-   npm run build
-   ```
-
-   > **Note:** `npm install` is required to install Node.js dependencies before building. For development, you can skip `npm run build` and use `composer run dev` instead, which runs Vite's development server with hot reloading.
 
 ## Running the Application
 
@@ -77,9 +73,8 @@ composer run dev
 This will start the Laravel server, queue worker, logs, and Vite dev server concurrently.
 
 ### Production Mode
-For production, build the assets and serve:
+For production, serve the application:
 ```bash
-npm run build
 php artisan serve
 ```
 
@@ -95,12 +90,11 @@ This will install dependencies, copy environment file, generate key, run migrati
 
 ## Database Configuration
 
-The application is configured to use SQLite by default for simplicity. The database file will be created at `database/database.sqlite`.
+The application is configured to use MySQL. Make sure you have MySQL installed and running, and update the database credentials in `.env` as shown in the installation steps.
 
-To use MySQL or PostgreSQL instead:
-1. Update `DB_CONNECTION` in `.env`
-2. Configure the corresponding database credentials
-3. Run migrations
+To use SQLite instead:
+1. Change `DB_CONNECTION=sqlite` in `.env`
+2. Run migrations (SQLite file will be created automatically)
 
 ## User Roles
 
