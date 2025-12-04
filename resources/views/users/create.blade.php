@@ -43,6 +43,15 @@
                                 <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                             </select>
                         </div>
+                        <div class="mb-3" id="club-field" style="display: none;">
+                            <label for="club_id" class="form-label fw-bold">Club</label>
+                            <select class="form-select" id="club_id" name="club_id">
+                                <option value="">Select Club</option>
+                                @foreach(\App\Models\Club::all() as $club)
+                                    <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle me-1"></i>Create User
@@ -57,4 +66,26 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('role').addEventListener('change', function() {
+        const clubField = document.getElementById('club-field');
+        if (this.value === 'officer') {
+            clubField.style.display = 'block';
+            document.getElementById('club_id').required = true;
+        } else {
+            clubField.style.display = 'none';
+            document.getElementById('club_id').required = false;
+        }
+    });
+
+    // Trigger on page load if officer is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role');
+        if (roleSelect.value === 'officer') {
+            document.getElementById('club-field').style.display = 'block';
+            document.getElementById('club_id').required = true;
+        }
+    });
+</script>
 @endsection

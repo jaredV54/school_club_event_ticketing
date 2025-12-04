@@ -8,16 +8,18 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4>Event Details</h4>
-                <a href="{{ route('events.edit', $event) }}" class="btn btn-warning btn-sm">
-                    <i class="bi bi-pencil"></i> Edit
-                </a>
+                @if(auth()->user()->role !== 'student')
+                    <a href="{{ route('events.edit', $event) }}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                @endif
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>ID:</strong> {{ $event->id }}</p>
                         <p><strong>Title:</strong> {{ $event->title }}</p>
-                        <p><strong>Club:</strong> {{ $event->club->name }}</p>
+                        <p><strong>Club:</strong> {{ $event->club ? $event->club->name : 'No Club' }}</p>
                         <p><strong>Venue:</strong> {{ $event->venue }}</p>
                         <p><strong>Capacity:</strong> {{ $event->capacity }}</p>
                     </div>

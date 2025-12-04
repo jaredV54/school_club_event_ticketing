@@ -37,6 +37,15 @@
                             <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
                         </select>
                     </div>
+                    <div class="mb-3" id="club-field" style="display: {{ old('role', $user->role) === 'officer' ? 'block' : 'none' }};">
+                        <label for="club_id" class="form-label">Club</label>
+                        <select class="form-select" id="club_id" name="club_id">
+                            <option value="">Select Club</option>
+                            @foreach(\App\Models\Club::all() as $club)
+                                <option value="{{ $club->id }}" {{ old('club_id', $user->club_id) == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Update User</button>
                     <a href="{{ route('users.show', $user) }}" class="btn btn-secondary">Cancel</a>
                 </form>
@@ -44,4 +53,26 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('role').addEventListener('change', function() {
+        const clubField = document.getElementById('club-field');
+        if (this.value === 'officer') {
+            clubField.style.display = 'block';
+            document.getElementById('club_id').required = true;
+        } else {
+            clubField.style.display = 'none';
+            document.getElementById('club_id').required = false;
+        }
+    });
+
+    // Trigger on page load if officer is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role');
+        if (roleSelect.value === 'officer') {
+            document.getElementById('club-field').style.display = 'block';
+            document.getElementById('club_id').required = true;
+        }
+    });
+</script>
 @endsection

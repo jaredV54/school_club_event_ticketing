@@ -13,9 +13,10 @@ class EventController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'admin') {
+            // Admin can see all events
             $events = Event::with('club')->get();
         } elseif ($user->role === 'officer' && $user->club_id) {
-            // Officers can only see events from their club
+            // Officers can only see their club's events
             $events = Event::with('club')->where('club_id', $user->club_id)->get();
         } else {
             // Students can view all events
@@ -56,9 +57,9 @@ class EventController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
-        // Check if officer is trying to create event for their club
-        if ($user->role === 'officer' && $user->club_id !== (int)$request->club_id) {
-            abort(403, 'You can only create events for your own club.');
+        // Officers can only create events for their club
+        if ($user->role === 'officer' && $user->club_id != $request->club_id) {
+            abort(403, 'You can only create events for your club.');
         }
 
         Event::create($request->all());
@@ -76,14 +77,13 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        // Check if officer owns this event
-        if ($user->role === 'officer' && $event->club_id !== $user->club_id) {
-            abort(403, 'You can only edit events for your own club.');
-        }
-
         if ($user->role === 'admin') {
             $clubs = Club::all();
-        } elseif ($user->role === 'officer') {
+        } elseif ($user->role === 'officer' && $user->club_id) {
+            // Officers can only edit events from their club
+            if ($event->club_id != $user->club_id) {
+                abort(403, 'You can only edit events from your club.');
+            }
             $clubs = Club::where('id', $user->club_id)->get();
         } else {
             abort(403, 'Unauthorized access.');
@@ -96,11 +96,6 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        // Check if officer owns this event
-        if ($user->role === 'officer' && $event->club_id !== $user->club_id) {
-            abort(403, 'You can only edit events for your own club.');
-        }
-
         $request->validate([
             'club_id' => 'required|exists:clubs,id',
             'title' => 'required|string|max:255',
@@ -112,9 +107,9 @@ class EventController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
-        // Check if officer is trying to change club
-        if ($user->role === 'officer' && $event->club_id !== (int)$request->club_id) {
-            abort(403, 'You cannot change the club for this event.');
+        // Officers can only update events from their club
+        if ($user->role === 'officer' && $user->club_id != $event->club_id) {
+            abort(403, 'You can only update events from your club.');
         }
 
         $event->update($request->all());
@@ -126,9 +121,9 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        // Check if officer owns this event
-        if ($user->role === 'officer' && $event->club_id !== $user->club_id) {
-            abort(403, 'You can only delete events for your own club.');
+        // Officers can only delete events from their club
+        if ($user->role === 'officer' && $user->club_id != $event->club_id) {
+            abort(403, 'You can only delete events from your club.');
         }
 
         $event->delete();

@@ -16,7 +16,7 @@ class RoleMiddleware
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!Auth::check()) {
             return redirect('/login');
@@ -24,16 +24,15 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        // Admin has access to everything
-        if ($user->role === 'admin') {
+        // Convert roles to lowercase for comparison
+        $allowedRoles = array_map('strtolower', $roles);
+        $userRole = strtolower($user->role);
+
+        // Check if user's role is in the allowed roles
+        if (in_array($userRole, $allowedRoles)) {
             return $next($request);
         }
 
-        // Check specific role permissions
-        if ($user->role !== $role) {
-            abort(403, 'Unauthorized access.');
-        }
-
-        return $next($request);
+        abort(403, 'Unauthorized access.');
     }
 }

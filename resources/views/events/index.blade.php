@@ -32,7 +32,7 @@
                     @forelse($events as $event)
                         <tr>
                             <td>{{ $event->title }}</td>
-                            <td>{{ $event->club->name }}</td>
+                            <td>{{ $event->club ? $event->club->name : 'No Club' }}</td>
                             <td>{{ $event->date->format('M d, Y') }}</td>
                             <td>{{ $event->time_start }} - {{ $event->time_end }}</td>
                             <td>{{ $event->venue }}</td>

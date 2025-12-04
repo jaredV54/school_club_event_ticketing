@@ -22,18 +22,25 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'officer', 'admin'])],
-        ]);
+        ];
+
+        if ($request->role === 'officer') {
+            $rules['club_id'] = 'required|exists:clubs,id';
+        }
+
+        $request->validate($rules);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'club_id' => $request->role === 'officer' ? $request->club_id : null,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -51,17 +58,24 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'officer', 'admin'])],
-        ]);
+        ];
+
+        if ($request->role === 'officer') {
+            $rules['club_id'] = 'required|exists:clubs,id';
+        }
+
+        $request->validate($rules);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'club_id' => $request->role === 'officer' ? $request->club_id : null,
         ]);
 
         if ($request->filled('password')) {
