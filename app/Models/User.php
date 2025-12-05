@@ -40,4 +40,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Club::class);
     }
+
+    public function pendingEventRegistrations()
+    {
+        return $this->hasMany(PendingEventRegistration::class);
+    }
+
+    public function pendingUserAccount()
+    {
+        return $this->hasOne(PendingUserAccount::class);
+    }
 }

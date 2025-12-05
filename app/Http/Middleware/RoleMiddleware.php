@@ -28,8 +28,18 @@ class RoleMiddleware
         $allowedRoles = array_map('strtolower', $roles);
         $userRole = strtolower($user->role);
 
-        // Check if user's role is in the allowed roles
-        if (in_array($userRole, $allowedRoles)) {
+        // Check if user's role is in the allowed roles or contains the role (for officer variants)
+        $hasAccess = in_array($userRole, $allowedRoles);
+        if (!$hasAccess) {
+            foreach ($allowedRoles as $role) {
+                if (str_contains($userRole, $role) || str_contains($role, $userRole)) {
+                    $hasAccess = true;
+                    break;
+                }
+            }
+        }
+
+        if ($hasAccess) {
             return $next($request);
         }
 

@@ -32,7 +32,14 @@
                     </span>
                     <span>Registrations</span>
                 </a>
-                
+
+                <a href="{{ route('approvals.event-registrations.index') }}" class="sidebar-link {{ request()->routeIs('approvals.event-registrations.*') ? 'active' : '' }}">
+                    <span class="sidebar-link-icon">
+                        <i class='bx bx-check-double'></i>
+                    </span>
+                    <span>Pending Registrations</span>
+                </a>
+
                 <a href="{{ route('attendance.index') }}" class="sidebar-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
                     <span class="sidebar-link-icon">
                         <i class='bx bx-check-circle'></i>
@@ -53,12 +60,19 @@
                     </span>
                     <span>Users</span>
                 </a>
+
+                <a href="{{ route('approvals.user-accounts.index') }}" class="sidebar-link {{ request()->routeIs('approvals.user-accounts.*') ? 'active' : '' }}">
+                    <span class="sidebar-link-icon">
+                        <i class='bx bx-user-check'></i>
+                    </span>
+                    <span>Account Approvals</span>
+                </a>
             </div>
             
         @elseif($user->role === 'officer')
             <!-- Officer Navigation -->
             <div class="sidebar-section">
-                <div class="sidebar-section-title">My Club</div>
+                <div class="sidebar-section-title">Management</div>
                 
                 <a href="{{ route('events.index') }}" class="sidebar-link {{ request()->routeIs('events.*') ? 'active' : '' }}">
                     <span class="sidebar-link-icon">
@@ -72,6 +86,13 @@
                         <i class='bx bx-receipt'></i>
                     </span>
                     <span>Registrations</span>
+                </a>
+
+                <a href="{{ route('approvals.event-registrations.index') }}" class="sidebar-link {{ request()->routeIs('approvals.event-registrations.*') ? 'active' : '' }}">
+                    <span class="sidebar-link-icon">
+                        <i class='bx bx-check-double'></i>
+                    </span>
+                    <span>Pending Registrations</span>
                 </a>
                 
                 <a href="{{ route('attendance.index') }}" class="sidebar-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">

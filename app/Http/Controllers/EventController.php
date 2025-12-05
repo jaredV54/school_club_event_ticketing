@@ -15,10 +15,7 @@ class EventController extends Controller
         $query = Event::with('club');
 
         // Apply role-based filtering
-        if ($user->role === 'officer' && $user->club_id) {
-            // Officers can only see their club's events
-            $query->where('club_id', $user->club_id);
-        }
+        // Officers have full access like admin
 
         // Apply filters
         if ($request->filled('title')) {
@@ -57,7 +54,7 @@ class EventController extends Controller
             $query->whereRaw('(SELECT COUNT(*) FROM event_registrations WHERE event_registrations.event_id = events.id) / capacity * 100 <= ?', [$request->registration_rate_max]);
         }
 
-        $events = $query->get();
+        $events = $query->orderBy('created_at', 'desc')->get();
         $clubs = Club::all();
 
         return view('events.index', compact('events', 'clubs'));
@@ -67,11 +64,8 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'officer') {
             $clubs = Club::all();
-        } elseif ($user->role === 'officer' && $user->club_id) {
-            // Officers can only create events for their club
-            $clubs = Club::where('id', $user->club_id)->get();
         } else {
             abort(403, 'Unauthorized access.');
         }
@@ -94,10 +88,7 @@ class EventController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
-        // Officers can only create events for their club
-        if ($user->role === 'officer' && $user->club_id != $request->club_id) {
-            abort(403, 'You can only create events for your club.');
-        }
+        // Officers have full access like admin
 
         Event::create($request->all());
 
@@ -108,12 +99,7 @@ class EventController extends Controller
     {
         $user = auth()->user();
         
-        // Officers should only view their club's events
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($event->club_id !== $user->club_id) {
-                abort(403, 'You can only view your club\'s events.');
-            }
-        }
+        // Officers have full access like admin
         
         $event->load('club', 'registrations.user');
         return view('events.show', compact('event'));
@@ -123,14 +109,8 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'officer') {
             $clubs = Club::all();
-        } elseif ($user->role === 'officer' && $user->club_id) {
-            // Officers can only edit events from their club
-            if ($event->club_id != $user->club_id) {
-                abort(403, 'You can only edit events from your club.');
-            }
-            $clubs = Club::where('id', $user->club_id)->get();
         } else {
             abort(403, 'Unauthorized access.');
         }
@@ -153,10 +133,7 @@ class EventController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
-        // Officers can only update events from their club
-        if ($user->role === 'officer' && $user->club_id != $event->club_id) {
-            abort(403, 'You can only update events from your club.');
-        }
+        // Officers have full access like admin
 
         $event->update($request->all());
 
@@ -167,10 +144,7 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        // Officers can only delete events from their club
-        if ($user->role === 'officer' && $user->club_id != $event->club_id) {
-            abort(403, 'You can only delete events from your club.');
-        }
+        // Officers have full access like admin
 
         $event->delete();
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');

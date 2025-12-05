@@ -15,12 +15,7 @@ class AttendanceController extends Controller
         $query = AttendanceLog::with('registration.event', 'registration.user');
 
         // Apply role-based filtering
-        if ($user->role === 'officer' && $user->club_id) {
-            // Officers can only see attendance for their club's events
-            $query->whereHas('registration.event', function($q) use ($user) {
-                $q->where('club_id', $user->club_id);
-            });
-        } elseif ($user->role === 'student') {
+        if ($user->role === 'student') {
             // Students can only see their own attendance
             $query->whereHas('registration', function($q) use ($user) {
                 $q->where('user_id', $user->id);
@@ -60,7 +55,7 @@ class AttendanceController extends Controller
             $query->where('timestamp', '<=', $request->timestamp_to . ' 23:59:59');
         }
 
-        $logs = $query->get();
+        $logs = $query->orderBy('created_at', 'desc')->get();
 
         return view('attendance.index', compact('logs'));
     }
@@ -69,15 +64,8 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'officer') {
             $registrations = EventRegistration::with('event', 'user')->get();
-        } elseif ($user->role === 'officer' && $user->club_id) {
-            // Officers can only see registrations for their club's events
-            $registrations = EventRegistration::with('event', 'user')
-                ->whereHas('event', function($query) use ($user) {
-                    $query->where('club_id', $user->club_id);
-                })
-                ->get();
         } else {
             abort(403, 'Unauthorized access.');
         }
@@ -88,21 +76,37 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         $request->validate([
+            'ticket_code' => 'required|string',
             'registration_id' => 'required|exists:event_registrations,id',
             'timestamp' => 'required|date',
         ]);
 
-        // Verify officer can only mark attendance for their club's events
-        if ($user->role === 'officer' && $user->club_id) {
-            $registration = EventRegistration::with('event')->findOrFail($request->registration_id);
-            if ($registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only mark attendance for your club\'s events.');
-            }
+        // Find the registration by ticket code to verify it exists
+        $registration = EventRegistration::with('event')->findOrFail($request->registration_id);
+
+        // Verify the ticket code matches
+        if ($registration->ticket_code !== $request->ticket_code) {
+            return back()->withErrors(['ticket_code' => 'Ticket code does not match the selected registration.']);
         }
 
-        AttendanceLog::create($request->all());
+        // Officers have full access like admin
+
+        // Check if attendance has already been logged for this registration
+        $existingAttendance = AttendanceLog::where('registration_id', $request->registration_id)->first();
+        if ($existingAttendance) {
+            return back()->withErrors(['ticket_code' => 'Attendance has already been logged for this registration.']);
+        }
+
+        // Create the attendance log
+        AttendanceLog::create([
+            'registration_id' => $request->registration_id,
+            'timestamp' => $request->timestamp,
+        ]);
+
+        // Update the registration status to "attended"
+        $registration->update(['status' => 'attended']);
 
         return redirect()->route('attendance.index')->with('success', 'Attendance log created successfully.');
     }
@@ -112,11 +116,7 @@ class AttendanceController extends Controller
         $user = auth()->user();
         
         // Authorization check
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($attendance->registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only view attendance for your club\'s events.');
-            }
-        } elseif ($user->role === 'student') {
+        if ($user->role === 'student') {
             if ($attendance->registration->user_id !== $user->id) {
                 abort(403, 'You can only view your own attendance.');
             }
@@ -130,21 +130,8 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         
-        // Authorization check
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($attendance->registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only edit attendance for your club\'s events.');
-            }
-        }
-        
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'officer') {
             $registrations = EventRegistration::with('event', 'user')->get();
-        } elseif ($user->role === 'officer' && $user->club_id) {
-            $registrations = EventRegistration::with('event', 'user')
-                ->whereHas('event', function($query) use ($user) {
-                    $query->where('club_id', $user->club_id);
-                })
-                ->get();
         } else {
             abort(403, 'Unauthorized access.');
         }
@@ -161,17 +148,21 @@ class AttendanceController extends Controller
             'timestamp' => 'required|date',
         ]);
 
-        // Authorization check
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($attendance->registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only update attendance for your club\'s events.');
+        // Officers have full access like admin
+
+        // Check if attendance has already been logged for the new registration (if different)
+        if ($request->registration_id != $attendance->registration_id) {
+            $existingAttendance = AttendanceLog::where('registration_id', $request->registration_id)->first();
+            if ($existingAttendance) {
+                return back()->withErrors(['registration_id' => 'Attendance has already been logged for this registration.']);
             }
-            
-            // Verify new registration is also from their club
-            $newRegistration = EventRegistration::with('event')->findOrFail($request->registration_id);
-            if ($newRegistration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only update to registrations from your club\'s events.');
-            }
+
+            // Revert old registration status
+            $attendance->registration->update(['status' => 'registered']);
+
+            // Update new registration status
+            $newRegistration = EventRegistration::findOrFail($request->registration_id);
+            $newRegistration->update(['status' => 'attended']);
         }
 
         $attendance->update($request->all());
@@ -183,13 +174,11 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         
-        // Authorization check
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($attendance->registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only delete attendance for your club\'s events.');
-            }
-        }
-        
+        // Officers have full access like admin
+
+        // Revert the registration status back to "registered"
+        $attendance->registration->update(['status' => 'registered']);
+
         $attendance->delete();
         return redirect()->route('attendance.index')->with('success', 'Attendance log deleted successfully.');
     }

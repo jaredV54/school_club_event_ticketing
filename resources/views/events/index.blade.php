@@ -16,24 +16,24 @@
         </p>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-        @if($user->role !== 'student')
-            <x-button variant="secondary" type="button" id="filter-toggle-btn">
-                <i class='bx bx-filter-alt'></i>
-                <span class="btn-text">Filters</span>
-            </x-button>
-            <x-button variant="primary" href="{{ route('events.create') }}">
+        <x-button variant="secondary" type="button" id="filter-toggle-btn">
+            <i class='bx bx-filter-alt'></i>
+            <span class="btn-text">Filters</span>
+        </x-button>
+        @if($user->role === 'student')
+            <x-button variant="primary" href="{{ route('registrations.create') }}">
                 <i class='bx bx-plus'></i>
-                <span class="btn-text">Create Event</span>
+                <span class="btn-text">Register for Event</span>
             </x-button>
         @endif
     </div>
 </div>
 
 <!-- Filters -->
-@if($user->role !== 'student')
-    <x-card style="margin-bottom: 24px; display: none;" id="filters-card">
-        <form method="GET" action="{{ route('events.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Basic Information Row -->
+<x-card style="margin-bottom: 24px; display: none;" id="filters-card">
+    <form method="GET" action="{{ route('events.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
+        @if($user->role === 'student')
+            <!-- Student Filters -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
                 <div>
                     <label for="title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
@@ -83,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- Date & Capacity Row -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div>
@@ -172,21 +171,160 @@
                     </div>
                 </div>
             </div>
+        @else
+            <!-- Admin/Officer Filters -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                <div>
+                    <label for="title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Event Title
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="title"
+                        name="title"
+                        value="{{ request('title') }}"
+                        placeholder="Search by title"
+                    >
+                </div>
 
-            <!-- Actions Row -->
-            <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
-                <x-button type="submit" variant="primary">
-                    <i class='bx bx-search'></i>
-                    <span>Filter</span>
-                </x-button>
-                <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('events.index') }}'">
-                    <i class='bx bx-x'></i>
-                    <span>Clear</span>
-                </x-button>
+                <div>
+                    <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Club
+                    </label>
+                    <select
+                        class="input"
+                        id="club_id"
+                        name="club_id"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Clubs</option>
+                        @foreach($clubs as $club)
+                            <option value="{{ $club->id }}" {{ request('club_id') == $club->id ? 'selected' : '' }}>
+                                {{ $club->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="venue" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Venue
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="venue"
+                        name="venue"
+                        value="{{ request('venue') }}"
+                        placeholder="Search by venue"
+                    >
+                </div>
             </div>
-        </form>
-    </x-card>
-@endif
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label for="date_from" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Date From
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="date_from"
+                            name="date_from"
+                            value="{{ request('date_from') }}"
+                        >
+                    </div>
+                    <div>
+                        <label for="date_to" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Date To
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="date_to"
+                            name="date_to"
+                            value="{{ request('date_to') }}"
+                        >
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label for="capacity_min" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Min Capacity
+                        </label>
+                        <input
+                            type="number"
+                            class="input"
+                            id="capacity_min"
+                            name="capacity_min"
+                            value="{{ request('capacity_min') }}"
+                            min="1"
+                        >
+                    </div>
+                    <div>
+                        <label for="capacity_max" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Max Capacity
+                        </label>
+                        <input
+                            type="number"
+                            class="input"
+                            id="capacity_max"
+                            name="capacity_max"
+                            value="{{ request('capacity_max') }}"
+                            min="1"
+                        >
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label for="registration_rate_min" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Min Reg. Rate (%)
+                        </label>
+                        <input
+                            type="number"
+                            class="input"
+                            id="registration_rate_min"
+                            name="registration_rate_min"
+                            value="{{ request('registration_rate_min') }}"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+                    <div>
+                        <label for="registration_rate_max" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Max Reg. Rate (%)
+                        </label>
+                        <input
+                            type="number"
+                            class="input"
+                            id="registration_rate_max"
+                            name="registration_rate_max"
+                            value="{{ request('registration_rate_max') }}"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Actions Row -->
+        <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
+            <x-button type="submit" variant="primary">
+                <i class='bx bx-search'></i>
+                <span>Filter</span>
+            </x-button>
+            <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('events.index') }}'">
+                <i class='bx bx-x'></i>
+                <span>Clear</span>
+            </x-button>
+        </div>
+    </form>
+</x-card>
 
 <!-- Events Table Card -->
 <x-card>
@@ -404,7 +542,7 @@ function toggleFilters() {
 
     if (filtersCard.style.display === 'none' || filtersCard.style.display === '') {
         filtersCard.style.display = 'block';
-        toggleIcon.className = 'bx bx-filter-alt-off';
+        toggleIcon.className = 'bx bx-chevron-up';
         toggleText.textContent = 'Hide Filters';
     } else {
         filtersCard.style.display = 'none';

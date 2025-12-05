@@ -17,26 +17,100 @@
         </p>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-        @if(!$isStudent)
-            <x-button variant="secondary" type="button" id="filter-toggle-btn">
-                <i class='bx bx-filter-alt'></i>
-                <span>Filters</span>
-            </x-button>
-        @endif
-        @if($user->role !== 'officer')
+        <x-button variant="secondary" type="button" id="filter-toggle-btn">
+            <i class='bx bx-filter-alt'></i>
+            <span class="btn-text">Filters</span>
+        </x-button>
+        @if($user->role !== 'student')
             <x-button variant="primary" href="{{ route('registrations.create') }}">
                 <i class='bx bx-plus'></i>
-                <span>{{ $isStudent ? 'Register for Event' : 'Create Registration' }}</span>
+                <span class="btn-text">{{ $isStudent ? 'Register for Event' : 'Create Registration' }}</span>
             </x-button>
         @endif
     </div>
 </div>
 
 <!-- Filters -->
-@if(!$isStudent)
-    <x-card style="margin-bottom: 24px; display: none;" id="filters-card">
-        <form method="GET" action="{{ route('registrations.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Event & Student Information Row -->
+<x-card style="margin-bottom: 24px; display: none;" id="filters-card">
+    <form method="GET" action="{{ route('registrations.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
+        @if($isStudent)
+            <!-- Student Filters -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                <div>
+                    <label for="event_title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Event Title
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="event_title"
+                        name="event_title"
+                        value="{{ request('event_title') }}"
+                        placeholder="Search by event title"
+                    >
+                </div>
+
+                <div>
+                    <label for="ticket_code" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Ticket Code
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="ticket_code"
+                        name="ticket_code"
+                        value="{{ request('ticket_code') }}"
+                        placeholder="Search by ticket code"
+                    >
+                </div>
+
+                <div>
+                    <label for="status" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Status
+                    </label>
+                    <select
+                        class="input"
+                        id="status"
+                        name="status"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="registered" {{ request('status') === 'registered' ? 'selected' : '' }}>Registered</option>
+                        <option value="attended" {{ request('status') === 'attended' ? 'selected' : '' }}>Attended</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label for="registered_from" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Registered From
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="registered_from"
+                            name="registered_from"
+                            value="{{ request('registered_from') }}"
+                        >
+                    </div>
+                    <div>
+                        <label for="registered_to" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Registered To
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="registered_to"
+                            name="registered_to"
+                            value="{{ request('registered_to') }}"
+                        >
+                    </div>
+                </div>
+            </div>
+        @else
+            <!-- Admin/Officer Filters -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
                 <div>
                     <label for="event_title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
@@ -81,7 +155,6 @@
                 </div>
             </div>
 
-            <!-- Ticket & Status Row -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <div>
                     <label for="ticket_code" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
@@ -140,21 +213,21 @@
                     </div>
                 </div>
             </div>
+        @endif
 
-            <!-- Actions Row -->
-            <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
-                <x-button type="submit" variant="primary">
-                    <i class='bx bx-search'></i>
-                    <span>Filter</span>
-                </x-button>
-                <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('registrations.index') }}'">
-                    <i class='bx bx-x'></i>
-                    <span>Clear</span>
-                </x-button>
-            </div>
-        </form>
-    </x-card>
-@endif
+        <!-- Actions Row -->
+        <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
+            <x-button type="submit" variant="primary">
+                <i class='bx bx-search'></i>
+                <span>Filter</span>
+            </x-button>
+            <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('registrations.index') }}'">
+                <i class='bx bx-x'></i>
+                <span>Clear</span>
+            </x-button>
+        </div>
+    </form>
+</x-card>
 
 <!-- Registrations Table Card -->
 <x-card>
@@ -238,7 +311,7 @@
                                         <i class='bx bx-show'></i>
                                     </x-button>
 
-                                    @if($user->role === 'admin')
+                                    @if($user->role !== 'student')
                                         <x-button
                                             variant="ghost"
                                             size="sm"
@@ -312,7 +385,7 @@
                             <i class='bx bx-show'></i>
                         </x-button>
 
-                        @if($user->role === 'admin')
+                        @if($user->role !== 'student')
                             <x-button
                                 variant="ghost"
                                 size="sm"
@@ -350,7 +423,7 @@
             <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 24px;">
                 {{ $isStudent ? 'Start by registering for an upcoming event' : 'Create your first registration to get started' }}
             </p>
-            @if($user->role !== 'officer')
+            @if($user->role !== 'student')
                 <x-button variant="primary" href="{{ route('registrations.create') }}">
                     <i class='bx bx-plus'></i>
                     <span>{{ $isStudent ? 'Browse Events' : 'Create Registration' }}</span>
@@ -369,7 +442,7 @@ function toggleFilters() {
 
     if (filtersCard.style.display === 'none' || filtersCard.style.display === '') {
         filtersCard.style.display = 'block';
-        toggleIcon.className = 'bx bx-filter-alt-off';
+        toggleIcon.className = 'bx bx-chevron-up';
         toggleText.textContent = 'Hide Filters';
     } else {
         filtersCard.style.display = 'none';

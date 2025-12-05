@@ -14,24 +14,82 @@
         </p>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
+        <x-button variant="secondary" type="button" id="filter-toggle-btn">
+            <i class='bx bx-filter-alt'></i>
+            <span class="btn-text">Filters</span>
+        </x-button>
         @if($user->role !== 'student')
-            <x-button variant="secondary" type="button" id="filter-toggle-btn">
-                <i class='bx bx-filter-alt'></i>
-                <span>Filters</span>
-            </x-button>
             <x-button variant="primary" href="{{ route('attendance.create') }}">
                 <i class='bx bx-plus'></i>
-                <span>Create Log</span>
+                <span class="btn-text">Create Log</span>
             </x-button>
         @endif
     </div>
-</div>
-
+    </div>
+    
 <!-- Filters -->
-@if($user->role !== 'student')
-    <x-card style="margin-bottom: 24px; display: none;" id="filters-card">
-        <form method="GET" action="{{ route('attendance.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Event & Student Information Row -->
+<x-card style="margin-bottom: 24px; display: none;" id="filters-card">
+    <form method="GET" action="{{ route('attendance.index') }}" style="display: flex; flex-direction: column; gap: 20px;">
+        @if($user->role === 'student')
+            <!-- Student Filters -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                <div>
+                    <label for="event_title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Event Title
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="event_title"
+                        name="event_title"
+                        value="{{ request('event_title') }}"
+                        placeholder="Search by event title"
+                    >
+                </div>
+
+                <div>
+                    <label for="ticket_code" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Ticket Code
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        id="ticket_code"
+                        name="ticket_code"
+                        value="{{ request('ticket_code') }}"
+                        placeholder="Search by ticket code"
+                    >
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label for="timestamp_from" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            From Date
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="timestamp_from"
+                            name="timestamp_from"
+                            value="{{ request('timestamp_from') }}"
+                        >
+                    </div>
+                    <div>
+                        <label for="timestamp_to" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            To Date
+                        </label>
+                        <input
+                            type="date"
+                            class="input"
+                            id="timestamp_to"
+                            name="timestamp_to"
+                            value="{{ request('timestamp_to') }}"
+                        >
+                    </div>
+                </div>
+            </div>
+        @else
+            <!-- Admin/Officer Filters -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
                 <div>
                     <label for="event_title" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
@@ -76,7 +134,6 @@
                 </div>
             </div>
 
-            <!-- Ticket & Timestamp Row -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <div>
                     <label for="ticket_code" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
@@ -119,21 +176,21 @@
                     </div>
                 </div>
             </div>
+        @endif
 
-            <!-- Actions Row -->
-            <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
-                <x-button type="submit" variant="primary">
-                    <i class='bx bx-search'></i>
-                    <span>Filter</span>
-                </x-button>
-                <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('attendance.index') }}'">
-                    <i class='bx bx-x'></i>
-                    <span>Clear</span>
-                </x-button>
-            </div>
-        </form>
-    </x-card>
-@endif
+        <!-- Actions Row -->
+        <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
+            <x-button type="submit" variant="primary">
+                <i class='bx bx-search'></i>
+                <span>Filter</span>
+            </x-button>
+            <x-button type="button" variant="secondary" onclick="window.location.href='{{ route('attendance.index') }}'">
+                <i class='bx bx-x'></i>
+                <span>Clear</span>
+            </x-button>
+        </div>
+    </form>
+</x-card>
 
 @if($user->role === 'student')
     <!-- Student View - Simple attendance history -->
@@ -195,7 +252,8 @@
         </x-slot:title>
 
         @if($logs->count() > 0)
-            <div style="overflow-x: auto;">
+            <!-- Desktop Table -->
+            <div style="overflow-x: auto;" class="table-responsive-card">
                 <table class="table">
                     <thead>
                         <tr>
@@ -287,6 +345,66 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Card Layout -->
+            <div class="table-mobile-cards">
+                @foreach($logs as $log)
+                    <div class="mobile-table-card">
+                        <div class="mobile-table-card-title">#{{ $log->id }} - {{ $log->registration->event->title }}</div>
+                        <div class="mobile-table-card-meta">
+                            <div class="mobile-table-card-meta-item">
+                                <i class='bx bx-user'></i>
+                                {{ $log->registration->user->name }}
+                            </div>
+                            <div class="mobile-table-card-meta-item">
+                                <i class='bx bx-receipt'></i>
+                                {{ $log->registration->ticket_code }}
+                            </div>
+                            <div class="mobile-table-card-meta-item">
+                                <i class='bx bx-calendar-check'></i>
+                                {{ $log->timestamp->format('M d, Y H:i') }}
+                            </div>
+                            <div class="mobile-table-card-meta-item">
+                                <i class='bx bx-building'></i>
+                                {{ $log->registration->event->club->name }}
+                            </div>
+                        </div>
+                        <div class="mobile-table-card-actions">
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                href="{{ route('attendance.show', $log) }}"
+                                title="View Details"
+                            >
+                                <i class='bx bx-show'></i>
+                            </x-button>
+
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                href="{{ route('attendance.edit', $log) }}"
+                                title="Edit"
+                            >
+                                <i class='bx bx-edit'></i>
+                            </x-button>
+
+                            <form method="POST" action="{{ route('attendance.destroy', $log) }}" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <x-button
+                                    variant="ghost"
+                                    size="sm"
+                                    type="submit"
+                                    title="Delete"
+                                    onclick="return confirm('Are you sure you want to delete this attendance log?')"
+                                >
+                                    <i class='bx bx-trash' style="color: var(--color-danger-600);"></i>
+                                </x-button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         @else
             <!-- Empty State -->
             <div style="text-align: center; padding: 48px 16px;">
@@ -315,7 +433,7 @@ function toggleFilters() {
 
     if (filtersCard.style.display === 'none' || filtersCard.style.display === '') {
         filtersCard.style.display = 'block';
-        toggleIcon.className = 'bx bx-filter-alt-off';
+        toggleIcon.className = 'bx bx-chevron-up';
         toggleText.textContent = 'Hide Filters';
     } else {
         filtersCard.style.display = 'none';

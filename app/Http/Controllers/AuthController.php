@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PendingUserAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +23,17 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
+            $user = Auth::user();
+
+            // Check if account is approved
+            $pendingAccount = $user->pendingUserAccount;
+            if ($pendingAccount && $pendingAccount->status !== 'approved') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Your account is pending approval by an administrator.',
+                ]);
+            }
+
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
         }
@@ -51,9 +63,13 @@ class AuthController extends Controller
             'role' => 'student', // default role
         ]);
 
-        Auth::login($user);
+        // All accounts require approval
+        PendingUserAccount::create([
+            'user_id' => $user->id,
+            'status' => 'pending',
+        ]);
 
-        return redirect('/dashboard');
+        return redirect('/login')->with('info', 'Your account has been created and is pending approval by an administrator.');
     }
 
     public function logout(Request $request)

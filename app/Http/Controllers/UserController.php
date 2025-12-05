@@ -30,7 +30,7 @@ class UserController extends Controller
             $query->where('club_id', $request->club_id);
         }
 
-        $users = $query->get();
+        $users = $query->orderBy('created_at', 'desc')->get();
         $clubs = \App\Models\Club::all();
 
         return view('users.index', compact('users', 'clubs'));
@@ -38,7 +38,8 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.create');
+        $clubs = \App\Models\Club::all();
+        return view('users.create', compact('clubs'));
     }
 
     public function store(Request $request)

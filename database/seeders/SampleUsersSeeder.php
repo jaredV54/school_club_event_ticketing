@@ -43,7 +43,7 @@ class SampleUsersSeeder extends Seeder
             ]
         );
 
-        // Create Student User
+        // Create Student Users
         User::firstOrCreate(
             ['email' => 'student@gmail.com'],
             [
@@ -54,9 +54,31 @@ class SampleUsersSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'student2@gmail.com'],
+            [
+                'name' => 'Student Two',
+                'password' => Hash::make('12341234'),
+                'role' => 'student',
+                'club_id' => null,
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'student3@gmail.com'],
+            [
+                'name' => 'Student Three',
+                'password' => Hash::make('12341234'),
+                'role' => 'student',
+                'club_id' => null,
+            ]
+        );
+
         $this->command->info('Sample users created successfully!');
         $this->command->info('Admin: admin@gmail.com / 12341234');
         $this->command->info('Officer: officer@gmail.com / 12341234');
         $this->command->info('Student: student@gmail.com / 12341234');
+        $this->command->info('Student: student2@gmail.com / 12341234');
+        $this->command->info('Student: student3@gmail.com / 12341234');
     }
 }

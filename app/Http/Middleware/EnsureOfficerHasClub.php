@@ -20,7 +20,8 @@ class EnsureOfficerHasClub
         $user = Auth::user();
 
         // If user is an officer, ensure they have a club assigned
-        if ($user && $user->role === 'officer' && !$user->club_id) {
+        $userRole = strtolower($user->role ?? '');
+        if ($user && (str_contains($userRole, 'officer') || str_contains('officer', $userRole)) && !$user->club_id) {
             abort(403, 'You must be assigned to a club to access this resource. Please contact an administrator.');
         }
 

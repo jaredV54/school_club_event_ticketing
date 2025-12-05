@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\EventRegistration;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\PendingEventRegistration;
+use App\Models\AttendanceLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,12 +19,7 @@ class RegistrationController extends Controller
         $query = EventRegistration::with('event', 'user');
 
         // Apply role-based filtering
-        if ($user->role === 'officer' && $user->club_id) {
-            // Officers can only see registrations for their club's events
-            $query->whereHas('event', function($q) use ($user) {
-                $q->where('club_id', $user->club_id);
-            });
-        } elseif ($user->role === 'student') {
+        if ($user->role === 'student') {
             // Students can only see their own registrations
             $query->where('user_id', $user->id);
         }
@@ -62,7 +59,7 @@ class RegistrationController extends Controller
             $query->where('created_at', '<=', $request->registered_to . ' 23:59:59');
         }
 
-        $registrations = $query->get();
+        $registrations = $query->orderBy('created_at', 'desc')->get();
 
         return view('registrations.index', compact('registrations'));
     }
@@ -71,56 +68,63 @@ class RegistrationController extends Controller
     {
         $user = auth()->user();
         $events = Event::all();
-        
-        if ($user->role === 'admin') {
-            $users = User::all();
-        } else {
-            // Students only see themselves
-            $users = User::where('id', $user->id)->get();
-        }
-        
-        return view('registrations.create', compact('events', 'users'));
+
+        return view('registrations.create', compact('events'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
-        
-        $request->validate([
+
+        $rules = [
             'event_id' => 'required|exists:events,id',
             'user_id' => 'required|exists:users,id',
-            'status' => 'required|in:registered,attended',
-        ]);
+        ];
+
+        if ($user->role !== 'student') {
+            $rules['status'] = 'required|in:registered,attended';
+        }
+
+        $request->validate($rules);
 
         // Students can only register themselves
         if ($user->role === 'student' && $request->user_id != $user->id) {
             abort(403, 'You can only register yourself for events.');
         }
 
-        // Check event capacity
-        $event = Event::findOrFail($request->event_id);
-        $currentRegistrations = EventRegistration::where('event_id', $event->id)->count();
+        // Check for duplicate registration (across approved registrations and attendance)
+        $this->validateNoDuplicateRegistration($request->event_id, $request->user_id);
 
-        if ($currentRegistrations >= $event->capacity) {
+        // Check event capacity (only for approved registrations)
+        $event = Event::findOrFail($request->event_id);
+        $currentApprovedRegistrations = EventRegistration::where('event_id', $event->id)->count();
+
+        if ($currentApprovedRegistrations >= $event->capacity) {
             return back()->withErrors(['event_id' => 'This event is at full capacity.']);
         }
 
-        // Check if already registered
-        $existing = EventRegistration::where('event_id', $request->event_id)
-            ->where('user_id', $request->user_id)
-            ->first();
-        if ($existing) {
-            return back()->withErrors(['user_id' => 'User is already registered for this event.']);
+        // Handle registration based on user role and selected status
+        if ($user->role === 'student') {
+            // Students always require approval
+            PendingEventRegistration::create([
+                'event_id' => $request->event_id,
+                'user_id' => $request->user_id,
+                'role' => $user->role,
+                'status' => 'pending',
+            ]);
+
+            return redirect()->route('registrations.index')->with('success', 'Registration request submitted for approval.');
+        } else {
+            // Admins/Officers can create approved registrations directly
+            EventRegistration::create([
+                'event_id' => $request->event_id,
+                'user_id' => $request->user_id,
+                'ticket_code' => Str::random(10),
+                'status' => $request->status,
+            ]);
+
+            return redirect()->route('registrations.index')->with('success', 'Registration created successfully.');
         }
-
-        EventRegistration::create([
-            'event_id' => $request->event_id,
-            'user_id' => $request->user_id,
-            'ticket_code' => Str::random(10),
-            'status' => $request->status,
-        ]);
-
-        return redirect()->route('registrations.index')->with('success', 'Registration created successfully.');
     }
 
     public function show(EventRegistration $registration)
@@ -128,11 +132,7 @@ class RegistrationController extends Controller
         $user = auth()->user();
         
         // Authorization check
-        if ($user->role === 'officer' && $user->club_id) {
-            if ($registration->event->club_id !== $user->club_id) {
-                abort(403, 'You can only view registrations for your club\'s events.');
-            }
-        } elseif ($user->role === 'student') {
+        if ($user->role === 'student') {
             if ($registration->user_id !== $user->id) {
                 abort(403, 'You can only view your own registrations.');
             }
@@ -166,5 +166,31 @@ class RegistrationController extends Controller
     {
         $registration->delete();
         return redirect()->route('registrations.index')->with('success', 'Registration deleted successfully.');
+    }
+
+    private function validateNoDuplicateRegistration($eventId, $userId)
+    {
+        // Check approved registrations
+        $existingRegistration = EventRegistration::where('event_id', $eventId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($existingRegistration) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'user_id' => 'User is already registered for this event.'
+            ]);
+        }
+
+        // Check attendance logs (which indicate past attendance)
+        $existingAttendance = AttendanceLog::whereHas('registration', function($query) use ($eventId, $userId) {
+            $query->where('event_id', $eventId)
+                  ->where('user_id', $userId);
+        })->first();
+
+        if ($existingAttendance) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'user_id' => 'User has already attended this event.'
+            ]);
+        }
     }
 }

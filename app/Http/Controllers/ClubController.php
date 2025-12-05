@@ -44,7 +44,7 @@ class ClubController extends Controller
             $query->where('created_at', '<=', $request->created_to . ' 23:59:59');
         }
 
-        $clubs = $query->get();
+        $clubs = $query->orderBy('created_at', 'desc')->get();
 
         return view('clubs.index', compact('clubs'));
     }

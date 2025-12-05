@@ -12,11 +12,11 @@
     <div style="display: flex; gap: 12px; align-items: center;">
         <x-button variant="secondary" type="button" id="filter-toggle-btn">
             <i class='bx bx-filter-alt'></i>
-            <span>Filters</span>
+            <span class="btn-text">Filters</span>
         </x-button>
         <x-button variant="primary" href="{{ route('clubs.create') }}">
             <i class='bx bx-plus'></i>
-            <span>Create Club</span>
+            <span class="btn-text">Create Club</span>
         </x-button>
     </div>
 </div>
@@ -167,7 +167,8 @@
     </x-slot:title>
     
     @if($clubs->count() > 0)
-        <div style="overflow-x: auto;">
+        <!-- Desktop Table -->
+        <div style="overflow-x: auto;" class="table-responsive-card">
             <table class="table">
                 <thead>
                     <tr>
@@ -214,30 +215,30 @@
                             </td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 4px; justify-content: flex-end;">
-                                    <x-button 
-                                        variant="ghost" 
-                                        size="sm" 
+                                    <x-button
+                                        variant="ghost"
+                                        size="sm"
                                         href="{{ route('clubs.show', $club) }}"
                                         title="View Details"
                                     >
                                         <i class='bx bx-show'></i>
                                     </x-button>
-                                    
-                                    <x-button 
-                                        variant="ghost" 
-                                        size="sm" 
+
+                                    <x-button
+                                        variant="ghost"
+                                        size="sm"
                                         href="{{ route('clubs.edit', $club) }}"
                                         title="Edit"
                                     >
                                         <i class='bx bx-edit'></i>
                                     </x-button>
-                                    
+
                                     <form method="POST" action="{{ route('clubs.destroy', $club) }}" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <x-button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <x-button
+                                            variant="ghost"
+                                            size="sm"
                                             type="submit"
                                             title="Delete"
                                             onclick="return confirm('Are you sure you want to delete this club? This will also delete all associated events.')"
@@ -251,6 +252,66 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Card Layout -->
+        <div class="table-mobile-cards">
+            @foreach($clubs as $club)
+                <div class="mobile-table-card">
+                    <div class="mobile-table-card-title">{{ $club->name }}</div>
+                    <div class="mobile-table-card-meta">
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-info-circle'></i>
+                            {{ $club->description ?: 'No description' }}
+                        </div>
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-calendar'></i>
+                            {{ $club->events->count() }} events
+                        </div>
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-group'></i>
+                            {{ $club->users->count() }} members
+                        </div>
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-calendar-plus'></i>
+                            Created {{ $club->created_at->format('M d, Y') }}
+                        </div>
+                    </div>
+                    <div class="mobile-table-card-actions">
+                        <x-button
+                            variant="ghost"
+                            size="sm"
+                            href="{{ route('clubs.show', $club) }}"
+                            title="View Details"
+                        >
+                            <i class='bx bx-show'></i>
+                        </x-button>
+
+                        <x-button
+                            variant="ghost"
+                            size="sm"
+                            href="{{ route('clubs.edit', $club) }}"
+                            title="Edit"
+                        >
+                            <i class='bx bx-edit'></i>
+                        </x-button>
+
+                        <form method="POST" action="{{ route('clubs.destroy', $club) }}" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                type="submit"
+                                title="Delete"
+                                onclick="return confirm('Are you sure you want to delete this club? This will also delete all associated events.')"
+                            >
+                                <i class='bx bx-trash' style="color: var(--color-danger-600);"></i>
+                            </x-button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
         </div>
     @else
         <!-- Empty State -->
@@ -279,7 +340,7 @@ function toggleFilters() {
 
     if (filtersCard.style.display === 'none' || filtersCard.style.display === '') {
         filtersCard.style.display = 'block';
-        toggleIcon.className = 'bx bx-filter-alt-off';
+        toggleIcon.className = 'bx bx-chevron-up';
         toggleText.textContent = 'Hide Filters';
     } else {
         filtersCard.style.display = 'none';

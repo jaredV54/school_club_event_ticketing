@@ -46,25 +46,83 @@
     </div>
 @endif
 
-<!-- KPI Tiles for Officer -->
-@if($user->role === 'officer')
+<!-- My Club Section for Officers -->
+@if(str_contains(strtolower($user->role), 'officer') && $user->club_id)
+    <x-card style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-heading); margin: 0;">
+                    My Club
+                </h3>
+                <p style="font-size: 12px; color: var(--color-text-muted); margin: 4px 0 0 0;">
+                    Manage your club's events and registrations
+                </p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+            <a href="{{ route('events.index') }}" style="text-decoration: none;">
+                <div class="my-club-card" style="padding: 16px; border: 1px solid #e5e7eb; background-color: #ffffff;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: #eff6ff; color: #2563eb;">
+                            <i class='bx bx-calendar-event' style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 600; color: #111827;">Events</div>
+                            <div style="font-size: 12px; color: #667085;">Manage club events</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('registrations.index') }}" style="text-decoration: none;">
+                <div class="my-club-card" style="padding: 16px; border: 1px solid #e5e7eb; background-color: #ffffff;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: #f0fdf4; color: #166534;">
+                            <i class='bx bx-receipt' style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 600; color: #111827;">Registrations</div>
+                            <div style="font-size: 12px; color: #667085;">View registrations</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('attendance.index') }}" style="text-decoration: none;">
+                <div class="my-club-card" style="padding: 16px; border: 1px solid #e5e7eb; background-color: #ffffff;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: #fef3f2; color: #dc2626;">
+                            <i class='bx bx-check-circle' style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; font-weight: 600; color: #111827;">Attendance</div>
+                            <div style="font-size: 12px; color: #667085;">Mark attendance</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </x-card>
+
+    <!-- KPI Tiles for Officer -->
     <div class="grid-dashboard" style="margin-bottom: 24px;">
-        <x-kpi-tile 
-            label="Club Events" 
+        <x-kpi-tile
+            label="Club Events"
             :value="$stats['club_events']"
             :delta="3.5"
             trend="up"
         />
-        
-        <x-kpi-tile 
-            label="Club Registrations" 
+
+        <x-kpi-tile
+            label="Club Registrations"
             :value="$stats['club_registrations']"
             :delta="15.2"
             trend="up"
         />
-        
-        <x-kpi-tile 
-            label="Attendance Records" 
+
+        <x-kpi-tile
+            label="Attendance Records"
             :value="$stats['club_attendance']"
             :delta="7.1"
             trend="up"
@@ -90,7 +148,7 @@
 <!-- Content Cards -->
 <div class="grid-dashboard">
     <!-- Recent Events Card -->
-    <x-card title="{{ $user->role === 'officer' ? 'Club Events' : 'Recent Events' }}">
+    <x-card title="{{ (str_contains(strtolower($user->role), 'officer') && $user->club_id) ? 'Club Events' : 'Recent Events' }}">
         <x-slot:actions>
             <a href="{{ route('events.index') }}" style="font-size: 14px; color: var(--color-primary-600); font-weight: 500;">
                 View all
@@ -132,7 +190,7 @@
     </x-card>
     
     <!-- Recent Registrations Card -->
-    <x-card title="{{ $user->role === 'student' ? 'My Registrations' : ($user->role === 'officer' ? 'Club Registrations' : 'Recent Registrations') }}">
+    <x-card title="{{ $user->role === 'student' ? 'My Registrations' : ((str_contains(strtolower($user->role), 'officer') && $user->club_id) ? 'Club Registrations' : 'Recent Registrations') }}">
         <x-slot:actions>
             <a href="{{ route('registrations.index') }}" style="font-size: 14px; color: var(--color-primary-600); font-weight: 500;">
                 View all

@@ -12,11 +12,11 @@
     <div style="display: flex; gap: 12px; align-items: center;">
         <x-button variant="secondary" type="button" id="filter-toggle-btn">
             <i class='bx bx-filter-alt'></i>
-            <span>Filters</span>
+            <span class="btn-text">Filters</span>
         </x-button>
         <x-button variant="primary" href="{{ route('users.create') }}">
             <i class='bx bx-plus'></i>
-            <span>Create User</span>
+            <span class="btn-text">Create User</span>
         </x-button>
     </div>
 </div>
@@ -115,7 +115,8 @@
     </x-slot:title>
 
     @if($users->count() > 0)
-        <div style="overflow-x: auto;">
+        <!-- Desktop Table -->
+        <div style="overflow-x: auto;" class="table-responsive-card">
             <table class="table">
                 <thead>
                     <tr>
@@ -202,6 +203,73 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Card Layout -->
+        <div class="table-mobile-cards">
+            @foreach($users as $user)
+                <div class="mobile-table-card">
+                    <div class="mobile-table-card-title">{{ $user->name }}</div>
+                    <div class="mobile-table-card-meta">
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-envelope'></i>
+                            {{ $user->email }}
+                        </div>
+                        <div class="mobile-table-card-meta-item">
+                            @if($user->role === 'admin')
+                                <x-badge variant="danger">Admin</x-badge>
+                            @elseif($user->role === 'officer')
+                                <x-badge variant="warning">Officer</x-badge>
+                            @else
+                                <x-badge variant="info">Student</x-badge>
+                            @endif
+                        </div>
+                        @if($user->club)
+                            <div class="mobile-table-card-meta-item">
+                                <i class='bx bx-building'></i>
+                                {{ $user->club->name }}
+                            </div>
+                        @endif
+                        <div class="mobile-table-card-meta-item">
+                            <i class='bx bx-calendar-plus'></i>
+                            Joined {{ $user->created_at->format('M d, Y') }}
+                        </div>
+                    </div>
+                    <div class="mobile-table-card-actions">
+                        <x-button
+                            variant="ghost"
+                            size="sm"
+                            href="{{ route('users.show', $user) }}"
+                            title="View Details"
+                        >
+                            <i class='bx bx-show'></i>
+                        </x-button>
+
+                        <x-button
+                            variant="ghost"
+                            size="sm"
+                            href="{{ route('users.edit', $user) }}"
+                            title="Edit"
+                        >
+                            <i class='bx bx-edit'></i>
+                        </x-button>
+
+                        <form method="POST" action="{{ route('users.destroy', $user) }}" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                type="submit"
+                                title="Delete"
+                                onclick="return confirm('Are you sure you want to delete this user?')"
+                            >
+                                <i class='bx bx-trash' style="color: var(--color-danger-600);"></i>
+                            </x-button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
     @else
         <!-- Empty State -->
         <div style="text-align: center; padding: 48px 16px;">
@@ -229,7 +297,7 @@ function toggleFilters() {
 
     if (filtersCard.style.display === 'none' || filtersCard.style.display === '') {
         filtersCard.style.display = 'block';
-        toggleIcon.className = 'bx bx-filter-alt-off';
+        toggleIcon.className = 'bx bx-chevron-up';
         toggleText.textContent = 'Hide Filters';
     } else {
         filtersCard.style.display = 'none';
