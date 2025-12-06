@@ -25,6 +25,11 @@
                 <i class='bx bx-plus'></i>
                 <span class="btn-text">Register for Event</span>
             </x-button>
+        @else
+            <x-button variant="primary" href="{{ route('events.create') }}">
+                <i class='bx bx-plus'></i>
+                <span class="btn-text">Create Event</span>
+            </x-button>
         @endif
     </div>
 </div>
@@ -220,6 +225,23 @@
                         placeholder="Search by venue"
                     >
                 </div>
+
+                <div>
+                    <label for="status" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Event Status
+                    </label>
+                    <select
+                        class="input"
+                        id="status"
+                        name="status"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="passed" {{ request('status') == 'passed' ? 'selected' : '' }}>Passed</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -347,6 +369,7 @@
                         <th class="table-col-mobile-hide">Venue</th>
                         <th class="table-col-mobile-hide">Capacity</th>
                         <th>Registered</th>
+                        <th class="table-col-mobile-hide">Status</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
@@ -368,9 +391,11 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="table-date-mobile">
-                                    <div class="date-main">{{ $event->date->format('M d, Y') }}</div>
-                                    <div class="date-time">{{ $event->time_start->format('H:i') }} - {{ $event->time_end->format('H:i') }}</div>
+                                <div style="font-size: 14px;">
+                                    {{ $event->date->format('M d, Y') }}
+                                </div>
+                                <div style="font-size: 12px; color: var(--color-text-muted);">
+                                    {{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_start)->format('h:i A') }} - {{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_end)->format('h:i A') }}
                                 </div>
                             </td>
                             <td class="table-col-mobile-hide">
@@ -397,6 +422,15 @@
                                     @endif
                                 </div>
                             </td>
+                            <td class="table-col-mobile-hide">
+                                @if($event->status === 'active')
+                                    <x-badge variant="success">Active</x-badge>
+                                @elseif($event->status === 'passed')
+                                    <x-badge variant="info">Passed</x-badge>
+                                @else
+                                    <x-badge variant="danger">Cancelled</x-badge>
+                                @endif
+                            </td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 4px; justify-content: flex-end;">
                                     <x-button
@@ -408,6 +442,46 @@
                                         <i class='bx bx-show'></i>
                                     </x-button>
 
+                                    @if($user->role === 'student')
+                                        @php
+                                            $hasPending = \App\Models\PendingEventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                                            $hasRegistration = \App\Models\EventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                                        @endphp
+                                        @if($hasRegistration)
+                                            <x-button
+                                                variant="ghost"
+                                                size="sm"
+                                                title="Already Registered"
+                                                disabled
+                                            >
+                                                <i class='bx bx-check' style="color: var(--color-success-600);"></i>
+                                            </x-button>
+                                        @elseif($hasPending)
+                                            <x-button
+                                                variant="ghost"
+                                                size="sm"
+                                                title="Registration Pending Approval"
+                                                disabled
+                                            >
+                                                <i class='bx bx-time' style="color: var(--color-warning-600);"></i>
+                                            </x-button>
+                                        @elseif($event->status === 'active')
+                                            <form method="POST" action="{{ route('registrations.store') }}" style="display: inline;">
+                                                @csrf
+                                                <input type="hidden" name="event_id" value="{{ $event->id }}">
+                                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                <x-button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    type="submit"
+                                                    title="Quick Register"
+                                                >
+                                                    <i class='bx bx-plus'></i>
+                                                </x-button>
+                                            </form>
+                                        @endif
+                                    @endif
+
                                     @if($user->role !== 'student')
                                         <x-button
                                             variant="ghost"
@@ -418,19 +492,21 @@
                                             <i class='bx bx-edit'></i>
                                         </x-button>
 
-                                        <form method="POST" action="{{ route('events.destroy', $event) }}" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-button
-                                                variant="ghost"
-                                                size="sm"
-                                                type="submit"
-                                                title="Delete"
-                                                onclick="return confirm('Are you sure you want to delete this event?')"
-                                            >
-                                                <i class='bx bx-trash' style="color: var(--color-danger-600);"></i>
-                                            </x-button>
-                                        </form>
+                                        @if($event->status === 'active')
+                                            <form method="POST" action="{{ route('events.destroy', $event) }}" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    type="submit"
+                                                    title="Cancel"
+                                                    onclick="return confirm('Are you sure you want to cancel this event?')"
+                                                >
+                                                    <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
+                                                </x-button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -452,11 +528,9 @@
                     <div class="mobile-table-card-meta">
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-calendar'></i>
-                            {{ $event->date->format('M d, Y') }}
-                        </div>
-                        <div class="mobile-table-card-meta-item">
-                            <i class='bx bx-time'></i>
-                            {{ $event->time_start->format('H:i') }} - {{ $event->time_end->format('H:i') }}
+                            <span style="font-size: 14px;">{{ $event->date->format('M d, Y') }}</span>
+                            <br>
+                            <span style="font-size: 12px; color: var(--color-text-muted);">{{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_start)->format('h:i A') }} - {{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_end)->format('h:i A') }}</span>
                         </div>
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-group'></i>
@@ -485,6 +559,46 @@
                             <i class='bx bx-show'></i>
                         </x-button>
 
+                        @if($user->role === 'student')
+                            @php
+                                $hasPending = \App\Models\PendingEventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                                $hasRegistration = \App\Models\EventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->exists();
+                            @endphp
+                            @if($hasRegistration)
+                                <x-button
+                                    variant="ghost"
+                                    size="sm"
+                                    title="Already Registered"
+                                    disabled
+                                >
+                                    <i class='bx bx-check' style="color: var(--color-success-600);"></i>
+                                </x-button>
+                            @elseif($hasPending)
+                                <x-button
+                                    variant="ghost"
+                                    size="sm"
+                                    title="Registration Pending Approval"
+                                    disabled
+                                >
+                                    <i class='bx bx-time' style="color: var(--color-warning-600);"></i>
+                                </x-button>
+                            @elseif($event->status === 'active')
+                                <form method="POST" action="{{ route('registrations.store') }}" style="display: inline;">
+                                    @csrf
+                                    <input type="hidden" name="event_id" value="{{ $event->id }}">
+                                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                    <x-button
+                                        variant="ghost"
+                                        size="sm"
+                                        type="submit"
+                                        title="Quick Register"
+                                    >
+                                        <i class='bx bx-plus'></i>
+                                    </x-button>
+                                </form>
+                            @endif
+                        @endif
+
                         @if($user->role !== 'student')
                             <x-button
                                 variant="ghost"
@@ -495,19 +609,21 @@
                                 <i class='bx bx-edit'></i>
                             </x-button>
 
-                            <form method="POST" action="{{ route('events.destroy', $event) }}" style="display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <x-button
-                                    variant="ghost"
-                                    size="sm"
-                                    type="submit"
-                                    title="Delete"
-                                    onclick="return confirm('Are you sure you want to delete this event?')"
-                                >
-                                    <i class='bx bx-trash' style="color: var(--color-danger-600);"></i>
-                                </x-button>
-                            </form>
+                            @if($event->status === 'active')
+                                <form method="POST" action="{{ route('events.destroy', $event) }}" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <x-button
+                                        variant="ghost"
+                                        size="sm"
+                                        type="submit"
+                                        title="Cancel"
+                                        onclick="return confirm('Are you sure you want to cancel this event?')"
+                                    >
+                                        <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
+                                    </x-button>
+                                </form>
+                            @endif
                         @endif
                     </div>
                 </div>

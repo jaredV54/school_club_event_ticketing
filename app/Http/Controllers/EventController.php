@@ -5,12 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Club;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user();
+
+        // Update status of past events to 'passed'
+        $now = Carbon::now('Asia/Manila');
+
+        // Update events from past dates
+        Event::where('status', 'active')
+            ->where('date', '<', $now->toDateString())
+            ->update(['status' => 'passed']);
+
+        // Update events from today that have ended
+        Event::where('status', 'active')
+            ->where('date', $now->toDateString())
+            ->where('time_end', '<', $now->format('H:i:s'))
+            ->update(['status' => 'passed']);
 
         $query = Event::with('club');
 
@@ -54,6 +69,10 @@ class EventController extends Controller
             $query->whereRaw('(SELECT COUNT(*) FROM event_registrations WHERE event_registrations.event_id = events.id) / capacity * 100 <= ?', [$request->registration_rate_max]);
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $events = $query->orderBy('created_at', 'desc')->get();
         $clubs = Club::all();
 
@@ -87,6 +106,12 @@ class EventController extends Controller
             'time_end' => 'required|date_format:H:i|after:time_start',
             'capacity' => 'required|integer|min:1',
         ]);
+
+        // Check if event end time is in the future
+        $endDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->date . ' ' . $request->time_end, 'Asia/Manila');
+        if ($endDateTime->isPast()) {
+            return back()->withErrors(['date' => 'The event end date and time must be in the future.'])->withInput();
+        }
 
         // Officers have full access like admin
 
@@ -133,9 +158,30 @@ class EventController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
+        // Check if event end time is in the future
+        $endDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->date . ' ' . $request->time_end, 'Asia/Manila');
+        if ($endDateTime->isPast()) {
+            return back()->withErrors(['date' => 'The event end date and time must be in the future.'])->withInput();
+        }
+
         // Officers have full access like admin
 
+        $wasInactive = in_array($event->status, ['cancelled', 'passed']);
+
         $event->update($request->all());
+
+        // If event was cancelled/passed and now has future end time, reactivate it
+        if ($wasInactive) {
+            $endDateTime = Carbon::createFromFormat('Y-m-d H:i', $request->date . ' ' . $request->time_end, 'Asia/Manila');
+            if ($endDateTime->isFuture()) {
+                $event->update(['status' => 'active']);
+                // For cancelled events, revert cancelled registrations back to registered
+                if ($event->status === 'cancelled') {
+                    $event->registrations()->where('status', 'cancelled')->update(['status' => 'registered']);
+                }
+                return redirect()->route('events.index')->with('success', 'Event reactivated successfully.');
+            }
+        }
 
         return redirect()->route('events.index')->with('success', 'Event updated successfully.');
     }
@@ -146,7 +192,9 @@ class EventController extends Controller
 
         // Officers have full access like admin
 
-        $event->delete();
-        return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+        $event->update(['status' => 'cancelled']);
+        // Update only registered registrations to cancelled
+        $event->registrations()->where('status', 'registered')->update(['status' => 'cancelled']);
+        return redirect()->route('events.index')->with('success', 'Event cancelled successfully.');
     }
 }

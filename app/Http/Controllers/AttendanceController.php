@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
 use App\Models\EventRegistration;
+use App\Models\Club;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
@@ -55,9 +56,22 @@ class AttendanceController extends Controller
             $query->where('timestamp', '<=', $request->timestamp_to . ' 23:59:59');
         }
 
-        $logs = $query->orderBy('created_at', 'desc')->get();
+        if ($request->filled('status')) {
+            $query->whereHas('registration', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
 
-        return view('attendance.index', compact('logs'));
+        if ($request->filled('club_id')) {
+            $query->whereHas('registration.event', function($q) use ($request) {
+                $q->where('club_id', $request->club_id);
+            });
+        }
+
+        $logs = $query->orderBy('created_at', 'desc')->get();
+        $clubs = Club::all();
+
+        return view('attendance.index', compact('logs', 'clubs'));
     }
 
     public function create()
@@ -65,7 +79,7 @@ class AttendanceController extends Controller
         $user = auth()->user();
         
         if ($user->role === 'admin' || $user->role === 'officer') {
-            $registrations = EventRegistration::with('event', 'user')->get();
+            $registrations = EventRegistration::with('event', 'user')->where('status', 'registered')->get();
         } else {
             abort(403, 'Unauthorized access.');
         }
@@ -89,6 +103,11 @@ class AttendanceController extends Controller
         // Verify the ticket code matches
         if ($registration->ticket_code !== $request->ticket_code) {
             return back()->withErrors(['ticket_code' => 'Ticket code does not match the selected registration.']);
+        }
+
+        // Check if the registration status is 'registered'
+        if ($registration->status !== 'registered') {
+            return back()->withErrors(['ticket_code' => 'Attendance can only be logged for registered students.']);
         }
 
         // Officers have full access like admin

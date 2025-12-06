@@ -97,19 +97,15 @@ class ApprovalController extends Controller
             abort(403, 'Only admins can access user account approvals.');
         }
 
-        $query = PendingUserAccount::with('user')->where('status', 'pending');
+        $query = PendingUserAccount::with('club');
 
         // Apply filters
         if ($request->filled('name')) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->name . '%');
-            });
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         if ($request->filled('email')) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('email', 'like', '%' . $request->email . '%');
-            });
+            $query->where('email', 'like', '%' . $request->email . '%');
         }
 
         $pendingAccounts = $query->orderBy('created_at', 'desc')->get();
@@ -125,7 +121,22 @@ class ApprovalController extends Controller
             abort(403, 'Only admins can approve user accounts.');
         }
 
-        $pendingAccount->update(['status' => 'approved']);
+        // Check if email already exists in users
+        if (\App\Models\User::where('email', $pendingAccount->email)->exists()) {
+            return back()->withErrors(['email' => 'A user with this email already exists.']);
+        }
+
+        // Create the user
+        \App\Models\User::create([
+            'name' => $pendingAccount->name,
+            'email' => $pendingAccount->email,
+            'password' => $pendingAccount->password,
+            'club_id' => $pendingAccount->club_id,
+            'role' => 'student',
+        ]);
+
+        // Delete the pending account
+        $pendingAccount->delete();
 
         return redirect()->route('approvals.user-accounts.index')->with('success', 'User account approved successfully.');
     }
@@ -138,7 +149,8 @@ class ApprovalController extends Controller
             abort(403, 'Only admins can reject user accounts.');
         }
 
-        $pendingAccount->update(['status' => 'rejected']);
+        // Delete the pending account
+        $pendingAccount->delete();
 
         return redirect()->route('approvals.user-accounts.index')->with('success', 'User account rejected.');
     }

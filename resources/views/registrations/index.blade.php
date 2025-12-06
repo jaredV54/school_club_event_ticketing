@@ -153,6 +153,25 @@
                         placeholder="Search by email"
                     >
                 </div>
+
+                <div>
+                    <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Club
+                    </label>
+                    <select
+                        class="input"
+                        id="club_id"
+                        name="club_id"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3cpolyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Clubs</option>
+                        @foreach($clubs as $club)
+                            <option value="{{ $club->id }}" {{ request('club_id') == $club->id ? 'selected' : '' }}>
+                                {{ $club->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -183,6 +202,8 @@
                         <option value="">All Statuses</option>
                         <option value="registered" {{ request('status') === 'registered' ? 'selected' : '' }}>Registered</option>
                         <option value="attended" {{ request('status') === 'attended' ? 'selected' : '' }}>Attended</option>
+                        <option value="absent" {{ request('status') === 'absent' ? 'selected' : '' }}>Absent</option>
+                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
 
@@ -245,7 +266,7 @@
                 <thead>
                     <tr>
                         <th>Event</th>
-                        <th>Date</th>
+                        <th>Date & Time</th>
                         @if(!$isStudent)
                             <th class="table-col-mobile-hide">Student</th>
                         @endif
@@ -267,9 +288,11 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="table-date-mobile">
-                                    <div class="date-main">{{ $registration->event->date->format('M d, Y') }}</div>
-                                    <div class="date-time">{{ $registration->event->time_start->format('H:i') }}</div>
+                                <div style="font-size: 14px;">
+                                    {{ $registration->event->date->format('M d, Y') }}
+                                </div>
+                                <div style="font-size: 12px; color: var(--color-text-muted);">
+                                    {{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_start)->format('h:i A') }}
                                 </div>
                             </td>
                             @if(!$isStudent)
@@ -293,6 +316,10 @@
                             <td>
                                 @if($registration->status === 'attended')
                                     <x-badge variant="success">Attended</x-badge>
+                                @elseif($registration->status === 'absent')
+                                    <x-badge variant="danger">Absent</x-badge>
+                                @elseif($registration->status === 'cancelled')
+                                    <x-badge variant="secondary">Cancelled</x-badge>
                                 @else
                                     <x-badge variant="info">Registered</x-badge>
                                 @endif
@@ -351,11 +378,9 @@
                     <div class="mobile-table-card-meta">
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-calendar'></i>
-                            {{ $registration->event->date->format('M d, Y') }}
-                        </div>
-                        <div class="mobile-table-card-meta-item">
-                            <i class='bx bx-time'></i>
-                            {{ $registration->event->time_start->format('H:i') }}
+                            <span style="font-size: 14px;">{{ $registration->event->date->format('M d, Y') }}</span>
+                            <br>
+                            <span style="font-size: 12px; color: var(--color-text-muted);">{{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_start)->format('h:i A') }}</span>
                         </div>
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-receipt'></i>
@@ -370,6 +395,10 @@
                         <div class="mobile-table-card-meta-item">
                             @if($registration->status === 'attended')
                                 <x-badge variant="success">Attended</x-badge>
+                            @elseif($registration->status === 'absent')
+                                <x-badge variant="danger">Absent</x-badge>
+                            @elseif($registration->status === 'cancelled')
+                                <x-badge variant="secondary">Cancelled</x-badge>
                             @else
                                 <x-badge variant="info">Registered</x-badge>
                             @endif

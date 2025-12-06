@@ -87,7 +87,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th>Club</th>
                         <th>Registered At</th>
                         <th style="text-align: right;">Actions</th>
                     </tr>
@@ -97,55 +97,53 @@
                         <tr>
                             <td>
                                 <div style="font-weight: 500; color: var(--color-text-heading);">
-                                    {{ $account->user->name }}
+                                    {{ $account->name }}
                                 </div>
                             </td>
                             <td>
                                 <div style="font-size: 14px; color: var(--color-text-body);">
-                                    {{ $account->user->email }}
+                                    {{ $account->email }}
                                 </div>
                             </td>
                             <td>
-                                <x-badge variant="secondary">{{ ucfirst($account->user->role) }}</x-badge>
+                                <div style="font-size: 14px; color: var(--color-text-body);">
+                                    {{ $account->club->name }}
+                                </div>
                             </td>
                             <td>
                                 <div style="font-size: 14px;">
                                     {{ $account->created_at->format('M d, Y') }}<br>
-                                    <span style="color: var(--color-text-muted);">{{ $account->created_at->format('H:i') }}</span>
+                                    <span style="color: var(--color-text-muted); font-size: 12px;">{{ $account->created_at->setTimezone('Asia/Manila')->format('h:i A') }}</span>
                                 </div>
                             </td>
                             <td style="text-align: right;">
-                                @if($account->status === 'pending')
-                                    <div style="display: flex; gap: 4px; justify-content: flex-end;">
-                                        <form method="POST" action="{{ route('approvals.user-accounts.approve', $account) }}" style="display: inline;">
-                                            @csrf
-                                            <x-button
-                                                variant="ghost"
-                                                size="sm"
-                                                type="submit"
-                                                title="Approve"
-                                                onclick="return confirm('Are you sure you want to approve this account?')"
-                                            >
-                                                <i class='bx bx-check' style="color: var(--color-success-600);"></i>
-                                            </x-button>
-                                        </form>
+                                <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                                    <form method="POST" action="{{ route('approvals.user-accounts.approve', $account) }}" style="display: inline;">
+                                        @csrf
+                                        <x-button
+                                            variant="ghost"
+                                            size="sm"
+                                            type="submit"
+                                            title="Approve"
+                                            onclick="return confirm('Are you sure you want to approve this account?')"
+                                        >
+                                            <i class='bx bx-check' style="color: var(--color-success-600);"></i>
+                                        </x-button>
+                                    </form>
 
-                                        <form method="POST" action="{{ route('approvals.user-accounts.reject', $account) }}" style="display: inline;">
-                                            @csrf
-                                            <x-button
-                                                variant="ghost"
-                                                size="sm"
-                                                type="submit"
-                                                title="Reject"
-                                                onclick="return confirm('Are you sure you want to reject this account?')"
-                                            >
-                                                <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
-                                            </x-button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <span style="font-size: 14px; color: var(--color-text-muted);">{{ ucfirst($account->status) }}</span>
-                                @endif
+                                    <form method="POST" action="{{ route('approvals.user-accounts.reject', $account) }}" style="display: inline;">
+                                        @csrf
+                                        <x-button
+                                            variant="ghost"
+                                            size="sm"
+                                            type="submit"
+                                            title="Reject"
+                                            onclick="return confirm('Are you sure you want to reject this account?')"
+                                        >
+                                            <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
+                                        </x-button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -157,49 +155,47 @@
         <div class="table-mobile-cards">
             @foreach($pendingAccounts as $account)
                 <div class="mobile-table-card">
-                    <div class="mobile-table-card-title">{{ $account->user->name }}</div>
+                    <div class="mobile-table-card-title">{{ $account->name }}</div>
                     <div class="mobile-table-card-meta">
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-envelope'></i>
-                            {{ $account->user->email }}
+                            {{ $account->email }}
                         </div>
                         <div class="mobile-table-card-meta-item">
-                            <i class='bx bx-user'></i>
-                            {{ ucfirst($account->user->role) }}
+                            <i class='bx bx-building'></i>
+                            {{ $account->club->name }}
                         </div>
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-calendar'></i>
-                            {{ $account->created_at->format('M d, Y H:i') }}
+                            {{ $account->created_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}
                         </div>
                     </div>
                     <div class="mobile-table-card-actions">
-                        @if($account->status === 'pending')
-                            <form method="POST" action="{{ route('approvals.user-accounts.approve', $account) }}" style="display: inline;">
-                                @csrf
-                                <x-button
-                                    variant="ghost"
-                                    size="sm"
-                                    type="submit"
-                                    title="Approve"
-                                    onclick="return confirm('Are you sure you want to approve this account?')"
-                                >
-                                    <i class='bx bx-check' style="color: var(--color-success-600);"></i>
-                                </x-button>
-                            </form>
+                        <form method="POST" action="{{ route('approvals.user-accounts.approve', $account) }}" style="display: inline;">
+                            @csrf
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                type="submit"
+                                title="Approve"
+                                onclick="return confirm('Are you sure you want to approve this account?')"
+                            >
+                                <i class='bx bx-check' style="color: var(--color-success-600);"></i>
+                            </x-button>
+                        </form>
 
-                            <form method="POST" action="{{ route('approvals.user-accounts.reject', $account) }}" style="display: inline;">
-                                @csrf
-                                <x-button
-                                    variant="ghost"
-                                    size="sm"
-                                    type="submit"
-                                    title="Reject"
-                                    onclick="return confirm('Are you sure you want to reject this account?')"
-                                >
-                                    <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
-                                </x-button>
-                            </form>
-                        @endif
+                        <form method="POST" action="{{ route('approvals.user-accounts.reject', $account) }}" style="display: inline;">
+                            @csrf
+                            <x-button
+                                variant="ghost"
+                                size="sm"
+                                type="submit"
+                                title="Reject"
+                                onclick="return confirm('Are you sure you want to reject this account?')"
+                            >
+                                <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
+                            </x-button>
+                        </form>
                     </div>
                 </div>
             @endforeach

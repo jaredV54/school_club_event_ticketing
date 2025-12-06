@@ -132,6 +132,43 @@
                         placeholder="Search by email"
                     >
                 </div>
+
+                <div>
+                    <label for="status" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Registration Status
+                    </label>
+                    <select
+                        class="input"
+                        id="status"
+                        name="status"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="registered" {{ request('status') == 'registered' ? 'selected' : '' }}>Registered</option>
+                        <option value="attended" {{ request('status') == 'attended' ? 'selected' : '' }}>Attended</option>
+                        <option value="absent" {{ request('status') == 'absent' ? 'selected' : '' }}>Absent</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                        Club
+                    </label>
+                    <select
+                        class="input"
+                        id="club_id"
+                        name="club_id"
+                        style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline%3e%3cpolyline%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
+                    >
+                        <option value="">All Clubs</option>
+                        @foreach($clubs as $club)
+                            <option value="{{ $club->id }}" {{ request('club_id') == $club->id ? 'selected' : '' }}>
+                                {{ $club->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -216,7 +253,7 @@
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 4px;">
                                     <i class='bx bx-time'></i>
-                                    {{ $log->timestamp->format('H:i') }}
+                                    {{ $log->timestamp->format('h:i A') }}
                                 </div>
                             </div>
                             <div style="margin-top: 12px;">
@@ -302,7 +339,7 @@
                                         {{ $log->timestamp->format('M d, Y') }}
                                     </div>
                                     <div style="font-size: 12px; color: var(--color-text-muted);">
-                                        {{ $log->timestamp->format('H:i:s') }}
+                                        {{ $log->timestamp->format('h:i:s A') }}
                                     </div>
                                 </td>
                                 <td style="text-align: right;">
@@ -362,7 +399,7 @@
                             </div>
                             <div class="mobile-table-card-meta-item">
                                 <i class='bx bx-calendar-check'></i>
-                                {{ $log->timestamp->format('M d, Y H:i') }}
+                                {{ $log->timestamp->format('M d, Y h:i A') }}
                             </div>
                             <div class="mobile-table-card-meta-item">
                                 <i class='bx bx-building'></i>

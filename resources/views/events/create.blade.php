@@ -1,13 +1,13 @@
 @extends('layout.main')
 
-@section('title', 'Create Event - EventOps')
+@section('title', 'Create Active Event - EventOps')
 
 @section('content')
 <div style="max-width: 800px; margin: 0 auto;">
     <!-- Page Header -->
     <div style="margin-bottom: 24px;">
-        <h1 style="margin-bottom: 4px;">Create Event</h1>
-        <p class="text-muted" style="font-size: 14px;">Fill in the details to create a new event</p>
+        <h1 style="margin-bottom: 4px;">Create Active Event</h1>
+        <p class="text-muted" style="font-size: 14px;">Fill in the details to create a new active event</p>
     </div>
 
     <!-- Event Form Card -->
@@ -103,12 +103,13 @@
                     <label for="date" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
                         Date <span style="color: var(--color-danger-600);">*</span>
                     </label>
-                    <input 
-                        type="date" 
-                        class="input" 
-                        id="date" 
-                        name="date" 
-                        value="{{ old('date') }}" 
+                    <input
+                        type="date"
+                        class="input"
+                        id="date"
+                        name="date"
+                        value="{{ old('date') }}"
+                        min="1900-01-01"
                         required
                     >
                     @error('date')
@@ -178,7 +179,7 @@
             <div style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
                 <x-button type="submit" variant="primary" style="flex: 1;">
                     <i class='bx bx-check'></i>
-                    <span>Create Event</span>
+                    <span>Create Active Event</span>
                 </x-button>
                 <x-button type="button" variant="secondary" href="{{ route('events.index') }}">
                     Cancel

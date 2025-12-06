@@ -100,7 +100,7 @@
                                     {{ $registration->event->title }}
                                 </div>
                                 <div style="font-size: 14px; color: var(--color-text-body);">
-                                    {{ $registration->event->date->format('M d, Y') }} at {{ $registration->event->time_start->format('H:i') }}
+                                    {{ $registration->event->date->format('M d, Y') }} at {{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_start)->format('h:i A') }}
                                 </div>
                             </td>
                             <td>
@@ -117,7 +117,7 @@
                             <td>
                                 <div style="font-size: 14px;">
                                     {{ $registration->created_at->format('M d, Y') }}<br>
-                                    <span style="color: var(--color-text-muted);">{{ $registration->created_at->format('H:i') }}</span>
+                                    <span style="color: var(--color-text-muted); font-size: 12px;">{{ $registration->created_at->format('h:i A') }}</span>
                                 </div>
                             </td>
                             <td style="text-align: right;">
@@ -175,7 +175,7 @@
                         </div>
                         <div class="mobile-table-card-meta-item">
                             <i class='bx bx-time'></i>
-                            {{ $registration->event->time_start->format('H:i') }}
+                            {{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_start)->format('h:i A') }}
                         </div>
                     </div>
                     <div class="mobile-table-card-actions">

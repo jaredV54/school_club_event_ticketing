@@ -104,12 +104,13 @@
                     <label for="date" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
                         Date <span style="color: var(--color-danger-600);">*</span>
                     </label>
-                    <input 
-                        type="date" 
-                        class="input" 
-                        id="date" 
-                        name="date" 
-                        value="{{ old('date', $event->date->format('Y-m-d')) }}" 
+                    <input
+                        type="date"
+                        class="input"
+                        id="date"
+                        name="date"
+                        value="{{ old('date', $event->date->format('Y-m-d')) }}"
+                        min="1900-01-01"
                         required
                     >
                     @error('date')
@@ -182,7 +183,7 @@
             <div style="display: flex; gap: 12px; padding-top: 8px; border-top: 1px solid var(--color-border-subtle);">
                 <x-button type="submit" variant="primary" style="flex: 1;">
                     <i class='bx bx-check'></i>
-                    <span>Update Event</span>
+                    <span>{{ in_array($event->status, ['cancelled', 'passed']) ? 'Reactivate Event' : 'Update Event' }}</span>
                 </x-button>
                 <x-button type="button" variant="secondary" href="{{ route('events.show', $event) }}">
                     Cancel

@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('pending_user_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->foreignId('club_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

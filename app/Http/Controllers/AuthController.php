@@ -23,19 +23,16 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
-            $user = Auth::user();
-
-            // Check if account is approved
-            $pendingAccount = $user->pendingUserAccount;
-            if ($pendingAccount && $pendingAccount->status !== 'approved') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Your account is pending approval by an administrator.',
-                ]);
-            }
-
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
+        }
+
+        // Check if email is in pending accounts
+        $pendingAccount = PendingUserAccount::where('email', $request->email)->first();
+        if ($pendingAccount) {
+            return back()->withErrors([
+                'email' => 'Your account is pending approval by an administrator.',
+            ]);
         }
 
         return back()->withErrors([
@@ -45,31 +42,56 @@ class AuthController extends Controller
 
     public function showRegisterForm()
     {
-        return view('auth.register');
+        $clubs = \App\Models\Club::all();
+        return view('auth.register', compact('clubs'));
     }
 
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'email' => 'required|string|email|max:255',
+            'club_id' => 'required|exists:clubs,id',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
+                'confirmed'
+            ],
+        ], [
+            'email.required' => 'Email address is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'club_id.required' => 'Please select a club.',
+            'club_id.exists' => 'Selected club does not exist.',
+            'password.min' => 'Password must be at least 8 characters long.',
+            'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            'password.confirmed' => 'Password confirmation does not match.',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'student', // default role
-        ]);
+        // Check if email already exists in users or pending accounts
+        if (User::where('email', $request->email)->exists()) {
+            return back()->withErrors(['email' => 'This email address is already registered.']);
+        }
 
-        // All accounts require approval
-        PendingUserAccount::create([
-            'user_id' => $user->id,
-            'status' => 'pending',
-        ]);
+        if (PendingUserAccount::where('email', $request->email)->exists()) {
+            return back()->withErrors(['email' => 'This email address is already pending approval.']);
+        }
 
-        return redirect('/login')->with('info', 'Your account has been created and is pending approval by an administrator.');
+        try {
+            // Create pending account
+            PendingUserAccount::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'club_id' => $request->club_id,
+                'status' => 'pending',
+            ]);
+
+            return back()->with('success', 'Your registration request has been sent. Please wait for approval by an administrator.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'An error occurred while submitting your account. Please try again.']);
+        }
     }
 
     public function logout(Request $request)

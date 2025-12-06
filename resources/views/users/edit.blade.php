@@ -109,10 +109,10 @@
                 @enderror
             </div>
 
-            <!-- Club (Conditional) -->
-            <div id="club-field" style="margin-bottom: 20px; {{ old('role', $user->role) === 'officer' ? '' : 'display: none;' }}">
+            <!-- Club -->
+            <div style="margin-bottom: 20px;">
                 <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
-                    Club <span style="color: var(--color-danger-600);">*</span>
+                    Club
                 </label>
                 <select
                     class="input"
@@ -120,7 +120,7 @@
                     name="club_id"
                     style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;"
                 >
-                    <option value="">Select a club</option>
+                    <option value="">No club</option>
                     @foreach(\App\Models\Club::all() as $club)
                         <option value="{{ $club->id }}" {{ old('club_id', $user->club_id) == $club->id ? 'selected' : '' }}>{{ $club->name }}</option>
                     @endforeach
@@ -144,25 +144,4 @@
     </x-card>
 </div>
 
-<script>
-    document.getElementById('role').addEventListener('change', function() {
-        const clubField = document.getElementById('club-field');
-        if (this.value === 'officer') {
-            clubField.style.display = 'block';
-            document.getElementById('club_id').required = true;
-        } else {
-            clubField.style.display = 'none';
-            document.getElementById('club_id').required = false;
-        }
-    });
-
-    // Trigger on page load if officer is selected
-    document.addEventListener('DOMContentLoaded', function() {
-        const roleSelect = document.getElementById('role');
-        if (roleSelect.value === 'officer') {
-            document.getElementById('club-field').style.display = 'block';
-            document.getElementById('club_id').required = true;
-        }
-    });
-</script>
 @endsection

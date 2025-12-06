@@ -19,21 +19,6 @@ class SampleDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create additional clubs
-        $clubs = [
-            ['name' => 'Computer Science Club', 'description' => 'Programming and tech enthusiasts'],
-            ['name' => 'Art & Design Club', 'description' => 'Creative minds and visual artists'],
-            ['name' => 'Sports Club', 'description' => 'Athletes and sports lovers'],
-            ['name' => 'Music Club', 'description' => 'Musicians and music appreciation'],
-            ['name' => 'Debate Club', 'description' => 'Public speaking and debate enthusiasts'],
-        ];
-
-        foreach ($clubs as $clubData) {
-            Club::firstOrCreate(
-                ['name' => $clubData['name']],
-                ['description' => $clubData['description']]
-            );
-        }
 
         // Create sample events
         $events = [
@@ -107,7 +92,7 @@ class SampleDataSeeder extends Seeder
         }
 
         // Create sample registrations
-        $students = User::where('role', 'student')->whereDoesntHave('pendingUserAccount')->get(); // Only approved students
+        $students = User::where('role', 'student')->get();
         $events = Event::all();
 
         if ($students->count() > 0 && $events->count() > 0) {
@@ -124,40 +109,11 @@ class SampleDataSeeder extends Seeder
             }
         }
 
-        // Create pending event registrations
-        if ($students->count() > 0 && $events->count() > 0) {
-            for ($i = 0; $i < 10; $i++) {
-                $student = $students->random();
-                $event = $events->random();
-                PendingEventRegistration::firstOrCreate(
-                    ['event_id' => $event->id, 'user_id' => $student->id],
-                    [
-                        'role' => 'student',
-                        'status' => 'pending',
-                    ]
-                );
-            }
-        }
 
-        // Create attendance logs
-        $registrations = EventRegistration::all();
-        if ($registrations->count() > 0) {
-            for ($i = 0; $i < 10; $i++) {
-                $registration = $registrations->random();
-                AttendanceLog::firstOrCreate(
-                    ['registration_id' => $registration->id],
-                    [
-                        'timestamp' => now()->subHours(rand(1, 5)),
-                    ]
-                );
-            }
-        }
 
         $this->command->info('Sample data created successfully!');
         $this->command->info('Created ' . Club::count() . ' clubs');
         $this->command->info('Created ' . Event::count() . ' events');
         $this->command->info('Created ' . EventRegistration::count() . ' registrations');
-        $this->command->info('Created ' . PendingEventRegistration::count() . ' pending registrations');
-        $this->command->info('Created ' . AttendanceLog::count() . ' attendance logs');
     }
 }

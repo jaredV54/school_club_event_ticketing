@@ -29,22 +29,55 @@
 
             <!-- Register Card -->
             <div class="card" style="padding: 32px;">
+                @if(session('success'))
+                    <div class="alert" style="margin-bottom: 24px; color: green; background-color: var(--color-success-50); border: 1px solid var(--color-success-200);">
+                        <div style="display: flex; align-items: start; gap: 8px;">
+                            <i class='bx bx-check-circle' style="font-size: 20px; margin-top: 2px;"></i>
+                            <span style="font-size: 14px;">{{ session('success') }}</span>
+                        </div>
+                    </div>
+                @endif
+
                 @if($errors->any())
-                    <div class="alert alert-danger" style="margin-bottom: 24px;">
+                    <div class="alert" style="margin-bottom: 24px; color: red;">
                         <div style="display: flex; align-items: start; gap: 8px;">
                             <i class='bx bx-error-circle' style="font-size: 20px; margin-top: 2px;"></i>
-                            <div>
+                            <ul style="margin: 0; padding-left: 20px; list-style-type: disc; font-size: 14px;">
                                 @foreach($errors->all() as $error)
-                                    <div>{{ $error }}</div>
+                                    <li>{{ $error }}</li>
                                 @endforeach
-                            </div>
+                            </ul>
                         </div>
                     </div>
                 @endif
 
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
-                    
+
+                    <!-- Club Selection -->
+                    <div style="margin-bottom: 20px;">
+                        <label for="club_id" style="display: block; font-size: 14px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 6px;">
+                            Club <span style="color: var(--color-danger-600);">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <select
+                                class="input"
+                                id="club_id"
+                                name="club_id"
+                                required
+                                style="width: 100%; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px; padding-left: 40px;"
+                            >
+                                <option value="">Select a club</option>
+                                @foreach($clubs as $club)
+                                    <option value="{{ $club->id }}" {{ old('club_id') == $club->id ? 'selected' : '' }}>
+                                        {{ $club->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <i class='bx bx-building' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
+                        </div>
+                    </div>
+
                     <!-- Name and Email Grid -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
                         <!-- Full Name -->
@@ -96,17 +129,21 @@
                                 Password <span style="color: var(--color-danger-600);">*</span>
                             </label>
                             <div style="position: relative;">
-                                <input 
-                                    type="password" 
-                                    class="input" 
-                                    id="password" 
-                                    name="password" 
+                                <input
+                                    type="password"
+                                    class="input"
+                                    id="password"
+                                    name="password"
                                     placeholder="Create a password"
                                     required
                                     style="padding-left: 40px;"
                                 >
                                 <i class='bx bx-lock' style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 18px;"></i>
                             </div>
+                            <ul style="font-size: 12px; color: var(--color-text-muted); margin-top: 4px; padding-left: 16px; list-style-type: disc;">
+                                <li>Password must be at least 8 characters long.</li>
+                                <li>Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</li>
+                            </ul>
                         </div>
 
                         <!-- Confirm Password -->
@@ -132,7 +169,7 @@
                     <!-- Submit Button -->
                     <x-button type="submit" variant="primary" style="width: 100%; justify-content: center;">
                         <i class='bx bx-user-plus'></i>
-                        <span>Create Account</span>
+                        <span>Create Student Account</span>
                     </x-button>
                 </form>
 

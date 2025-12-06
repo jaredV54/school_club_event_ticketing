@@ -30,7 +30,7 @@
             <div>
                 <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Date & Time</div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $event->date->format('M d, Y') }}</div>
-                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $event->time_start }} - {{ $event->time_end }}</div>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_start)->format('h:i A') }} - {{ \Carbon\Carbon::createFromFormat('H:i:s', $event->time_end)->format('h:i A') }}</div>
             </div>
             
             <div>
@@ -150,17 +150,17 @@
             <span>Back to Events</span>
         </x-button>
         
-        @if($user->role !== 'student')
+        @if($user->role !== 'student' && $event->status === 'active')
             <form method="POST" action="{{ route('events.destroy', $event) }}" style="margin-left: auto;">
                 @csrf
                 @method('DELETE')
-                <x-button 
-                    variant="danger" 
+                <x-button
+                    variant="danger"
                     type="submit"
-                    onclick="return confirm('Are you sure you want to delete this event? This will also delete all registrations. This action cannot be undone.')"
+                    onclick="return confirm('Are you sure you want to cancel this event? This will cancel all registrations. This action cannot be undone.')"
                 >
-                    <i class='bx bx-trash'></i>
-                    <span>Delete Event</span>
+                    <i class='bx bx-x'></i>
+                    <span>Cancel Event</span>
                 </x-button>
             </form>
         @endif

@@ -18,12 +18,11 @@ class Event extends Model
         'time_start',
         'time_end',
         'capacity',
+        'status',
     ];
 
     protected $casts = [
         'date' => 'date',
-        'time_start' => 'datetime:H:i',
-        'time_end' => 'datetime:H:i',
     ];
 
     public function club()

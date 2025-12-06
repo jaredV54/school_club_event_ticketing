@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EventRegistration;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\Club;
 use App\Models\PendingEventRegistration;
 use App\Models\AttendanceLog;
 use Illuminate\Http\Request;
@@ -59,15 +60,22 @@ class RegistrationController extends Controller
             $query->where('created_at', '<=', $request->registered_to . ' 23:59:59');
         }
 
-        $registrations = $query->orderBy('created_at', 'desc')->get();
+        if ($request->filled('club_id')) {
+            $query->whereHas('event', function($q) use ($request) {
+                $q->where('club_id', $request->club_id);
+            });
+        }
 
-        return view('registrations.index', compact('registrations'));
+        $registrations = $query->orderBy('created_at', 'desc')->get();
+        $clubs = Club::all();
+
+        return view('registrations.index', compact('registrations', 'clubs'));
     }
 
     public function create()
     {
         $user = auth()->user();
-        $events = Event::all();
+        $events = Event::where('status', 'active')->get();
 
         return view('registrations.create', compact('events'));
     }
@@ -113,7 +121,7 @@ class RegistrationController extends Controller
                 'status' => 'pending',
             ]);
 
-            return redirect()->route('registrations.index')->with('success', 'Registration request submitted for approval.');
+            return redirect()->route('events.index')->with('success', 'Registration request submitted for approval.');
         } else {
             // Admins/Officers can create approved registrations directly
             EventRegistration::create([

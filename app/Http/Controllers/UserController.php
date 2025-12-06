@@ -44,25 +44,20 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $rules = [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'officer', 'admin'])],
-        ];
-
-        if ($request->role === 'officer') {
-            $rules['club_id'] = 'required|exists:clubs,id';
-        }
-
-        $request->validate($rules);
+            'club_id' => 'nullable|exists:clubs,id',
+        ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'club_id' => $request->role === 'officer' ? $request->club_id : null,
+            'club_id' => $request->club_id,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -80,24 +75,19 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $rules = [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => ['required', Rule::in(['student', 'officer', 'admin'])],
-        ];
-
-        if ($request->role === 'officer') {
-            $rules['club_id'] = 'required|exists:clubs,id';
-        }
-
-        $request->validate($rules);
+            'club_id' => 'nullable|exists:clubs,id',
+        ]);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
-            'club_id' => $request->role === 'officer' ? $request->club_id : null,
+            'club_id' => $request->club_id,
         ]);
 
         if ($request->filled('password')) {

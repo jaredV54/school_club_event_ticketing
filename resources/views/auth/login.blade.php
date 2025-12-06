@@ -30,10 +30,10 @@
             <!-- Login Card -->
             <div class="card" style="padding: 32px;">
                 @if($errors->any())
-                    <div class="alert alert-danger" style="margin-bottom: 24px;">
+                    <div class="alert" style="margin-bottom: 24px; color: red;">
                         <div style="display: flex; align-items: start; gap: 8px;">
                             <i class='bx bx-error-circle' style="font-size: 20px; margin-top: 2px;"></i>
-                            <div>
+                            <div style="font-size: 14px;">
                                 @foreach($errors->all() as $error)
                                     <div>{{ $error }}</div>
                                 @endforeach

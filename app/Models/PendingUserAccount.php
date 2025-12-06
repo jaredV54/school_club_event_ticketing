@@ -10,12 +10,23 @@ class PendingUserAccount extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'status',
+        'name',
+        'email',
+        'password',
+        'club_id',
+    ];
+
+    protected $casts = [
+        'password' => 'hashed',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function club()
+    {
+        return $this->belongsTo(Club::class);
     }
 }

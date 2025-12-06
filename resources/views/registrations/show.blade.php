@@ -37,7 +37,7 @@
             <div>
                 <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Date & Time</div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $registration->event->date->format('M d, Y') }}</div>
-                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $registration->event->time_start }} - {{ $registration->event->time_end }}</div>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_start)->format('h:i A') }} - {{ \Carbon\Carbon::createFromFormat('H:i:s', $registration->event->time_end)->format('h:i A') }}</div>
             </div>
             
             <div>

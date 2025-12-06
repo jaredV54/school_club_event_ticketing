@@ -21,6 +21,7 @@ class RegistrationApiController extends Controller
 
         $registration = EventRegistration::with('event', 'user')
             ->where('ticket_code', $ticketCode)
+            ->where('status', 'registered')
             ->first();
 
         if (!$registration) {
