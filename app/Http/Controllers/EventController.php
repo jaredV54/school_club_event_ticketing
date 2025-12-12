@@ -30,6 +30,9 @@ class EventController extends Controller
         $query = Event::with('club');
 
         // Apply role-based filtering
+        if ($user->role !== 'admin') {
+            $query->where('is_hidden', false);
+        }
         // Officers have full access like admin
 
         // Apply filters
@@ -196,5 +199,23 @@ class EventController extends Controller
         // Update only registered registrations to cancelled
         $event->registrations()->where('status', 'registered')->update(['status' => 'cancelled']);
         return redirect()->route('events.index')->with('success', 'Event cancelled successfully.');
+    }
+
+    public function toggleHidden(Event $event)
+    {
+        $user = auth()->user();
+
+        if ($user->role !== 'admin') {
+            abort(403, 'Only admins can toggle event visibility.');
+        }
+
+        if ($event->status !== 'cancelled') {
+            return back()->withErrors(['event' => 'Only cancelled events can be hidden.']);
+        }
+
+        $event->update(['is_hidden' => !$event->is_hidden]);
+
+        $message = $event->is_hidden ? 'Event hidden from public.' : 'Event made visible to public.';
+        return redirect()->back()->with('success', $message);
     }
 }

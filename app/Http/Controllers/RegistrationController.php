@@ -75,7 +75,9 @@ class RegistrationController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $events = Event::where('status', 'active')->get();
+        $events = Event::where('status', 'active')
+            ->where('is_hidden', false)
+            ->get();
 
         return view('registrations.create', compact('events'));
     }
@@ -124,12 +126,19 @@ class RegistrationController extends Controller
             return redirect()->route('events.index')->with('success', 'Registration request submitted for approval.');
         } else {
             // Admins/Officers can create approved registrations directly
-            EventRegistration::create([
+            $registration = EventRegistration::create([
                 'event_id' => $request->event_id,
                 'user_id' => $request->user_id,
                 'ticket_code' => Str::random(10),
                 'status' => $request->status,
             ]);
+
+            if ($request->status === 'attended') {
+                AttendanceLog::create([
+                    'registration_id' => $registration->id,
+                    'timestamp' => now(),
+                ]);
+            }
 
             return redirect()->route('registrations.index')->with('success', 'Registration created successfully.');
         }
@@ -162,10 +171,22 @@ class RegistrationController extends Controller
         $request->validate([
             'event_id' => 'required|exists:events,id',
             'user_id' => 'required|exists:users,id',
-            'status' => 'required|in:registered,attended',
+            'status' => 'required|in:registered,attended,absent,cancelled',
         ]);
 
+        $oldStatus = $registration->status;
         $registration->update($request->only(['event_id', 'user_id', 'status']));
+
+        // If status changed to 'attended' and no attendance log exists, create one
+        if ($request->status === 'attended' && $oldStatus !== 'attended') {
+            $existingLog = AttendanceLog::where('registration_id', $registration->id)->first();
+            if (!$existingLog) {
+                AttendanceLog::create([
+                    'registration_id' => $registration->id,
+                    'timestamp' => now(),
+                ]);
+            }
+        }
 
         return redirect()->route('registrations.index')->with('success', 'Registration updated successfully.');
     }

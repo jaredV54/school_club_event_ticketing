@@ -507,6 +507,20 @@
                                                 </x-button>
                                             </form>
                                         @endif
+
+                                        @if($user->role === 'admin' && $event->status === 'cancelled')
+                                            <form method="POST" action="{{ route('events.toggle-hidden', $event) }}" style="display: inline;">
+                                                @csrf
+                                                <x-button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    type="submit"
+                                                    title="{{ $event->is_hidden ? 'Unhide' : 'Hide' }}"
+                                                >
+                                                    <i class='bx {{ $event->is_hidden ? 'bx-show' : 'bx-hide' }}' style="color: var(--color-warning-600);"></i>
+                                                </x-button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -621,6 +635,20 @@
                                         onclick="return confirm('Are you sure you want to cancel this event?')"
                                     >
                                         <i class='bx bx-x' style="color: var(--color-danger-600);"></i>
+                                    </x-button>
+                                </form>
+                            @endif
+
+                            @if($user->role === 'admin' && $event->status === 'cancelled')
+                                <form method="POST" action="{{ route('events.toggle-hidden', $event) }}" style="display: inline;">
+                                    @csrf
+                                    <x-button
+                                        variant="ghost"
+                                        size="sm"
+                                        type="submit"
+                                        title="{{ $event->is_hidden ? 'Unhide' : 'Hide' }}"
+                                    >
+                                        <i class='bx {{ $event->is_hidden ? 'bx-show' : 'bx-hide' }}' style="color: var(--color-warning-600);"></i>
                                     </x-button>
                                 </form>
                             @endif

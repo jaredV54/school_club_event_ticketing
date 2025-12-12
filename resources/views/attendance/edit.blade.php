@@ -50,7 +50,7 @@
                     class="input"
                     id="timestamp"
                     name="timestamp"
-                    value="{{ old('timestamp', $attendance->timestamp->format('Y-m-d\TH:i')) }}"
+                    value="{{ old('timestamp', $attendance->timestamp->setTimezone('Asia/Manila')->format('Y-m-d\TH:i')) }}"
                     required
                 >
                 @error('timestamp')

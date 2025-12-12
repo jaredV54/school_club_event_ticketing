@@ -19,6 +19,7 @@ class Event extends Model
         'time_end',
         'capacity',
         'status',
+        'is_hidden',
     ];
 
     protected $casts = [

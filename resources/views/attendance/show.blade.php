@@ -58,10 +58,10 @@
             <div>
                 <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Check-in Time</div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading); margin-top: 8px;">
-                    {{ $attendance->timestamp->format('M d, Y') }}
+                    {{ $attendance->timestamp->setTimezone('Asia/Manila')->format('M d, Y') }}
                 </div>
                 <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">
-                    {{ $attendance->timestamp->format('h:i:s A') }}
+                    {{ $attendance->timestamp->setTimezone('Asia/Manila')->format('h:i A') }}
                 </div>
             </div>
         </div>
@@ -77,14 +77,14 @@
 
             <div>
                 <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Created</div>
-                <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $attendance->created_at->format('M d, Y') }}</div>
-                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $attendance->created_at->format('h:i A') }}</div>
+                <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $attendance->created_at->setTimezone('Asia/Manila')->format('M d, Y') }}</div>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $attendance->created_at->setTimezone('Asia/Manila')->format('h:i A') }}</div>
             </div>
 
             <div>
                 <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Last Updated</div>
-                <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $attendance->updated_at->format('M d, Y') }}</div>
-                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $attendance->updated_at->format('h:i A') }}</div>
+                <div style="font-size: 16px; font-weight: 600; color: var(--color-text-heading);">{{ $attendance->updated_at->setTimezone('Asia/Manila')->format('M d, Y') }}</div>
+                <div style="font-size: 14px; color: var(--color-text-muted); margin-top: 2px;">{{ $attendance->updated_at->setTimezone('Asia/Manila')->format('h:i A') }}</div>
             </div>
         </div>
     </x-card>

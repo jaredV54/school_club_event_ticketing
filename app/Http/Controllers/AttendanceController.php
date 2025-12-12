@@ -118,10 +118,11 @@ class AttendanceController extends Controller
             return back()->withErrors(['ticket_code' => 'Attendance has already been logged for this registration.']);
         }
 
-        // Create the attendance log
+        // Create the attendance log (convert timestamp from Asia/Manila to UTC)
+        $timestamp = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $request->timestamp, 'Asia/Manila')->utc();
         AttendanceLog::create([
             'registration_id' => $request->registration_id,
-            'timestamp' => $request->timestamp,
+            'timestamp' => $timestamp,
         ]);
 
         // Update the registration status to "attended"
@@ -184,7 +185,13 @@ class AttendanceController extends Controller
             $newRegistration->update(['status' => 'attended']);
         }
 
-        $attendance->update($request->all());
+        // Convert timestamp from Asia/Manila to UTC
+        $data = $request->all();
+        if (isset($data['timestamp'])) {
+            $data['timestamp'] = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $data['timestamp'], 'Asia/Manila')->utc();
+        }
+
+        $attendance->update($data);
 
         return redirect()->route('attendance.index')->with('success', 'Attendance log updated successfully.');
     }

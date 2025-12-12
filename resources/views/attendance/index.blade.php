@@ -249,11 +249,11 @@
                             <div style="display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--color-text-muted);">
                                 <div style="display: flex; align-items: center; gap: 4px;">
                                     <i class='bx bx-calendar'></i>
-                                    {{ $log->timestamp->format('M d, Y') }}
+                                    {{ $log->timestamp->setTimezone('Asia/Manila')->format('M d, Y') }}
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 4px;">
                                     <i class='bx bx-time'></i>
-                                    {{ $log->timestamp->format('h:i A') }}
+                                    {{ $log->timestamp->setTimezone('Asia/Manila')->format('h:i A') }}
                                 </div>
                             </div>
                             <div style="margin-top: 12px;">
@@ -336,10 +336,10 @@
                                 </td>
                                 <td>
                                     <div style="font-size: 14px;">
-                                        {{ $log->timestamp->format('M d, Y') }}
+                                        {{ $log->timestamp->setTimezone('Asia/Manila')->format('M d, Y') }}
                                     </div>
                                     <div style="font-size: 12px; color: var(--color-text-muted);">
-                                        {{ $log->timestamp->format('h:i:s A') }}
+                                        {{ $log->timestamp->setTimezone('Asia/Manila')->format('h:i A') }}
                                     </div>
                                 </td>
                                 <td style="text-align: right;">
@@ -399,7 +399,7 @@
                             </div>
                             <div class="mobile-table-card-meta-item">
                                 <i class='bx bx-calendar-check'></i>
-                                {{ $log->timestamp->format('M d, Y h:i A') }}
+                                {{ $log->timestamp->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}
                             </div>
                             <div class="mobile-table-card-meta-item">
                                 <i class='bx bx-building'></i>

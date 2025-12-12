@@ -32,6 +32,9 @@ Route::middleware('auth')->group(function () {
 
         // Clubs management
         Route::resource('clubs', ClubController::class);
+
+        // Event visibility toggle
+        Route::post('events/{event}/toggle-hidden', [EventController::class, 'toggleHidden'])->name('events.toggle-hidden');
     });
 
     // Events - accessible by admin, officer, and student with different permissions

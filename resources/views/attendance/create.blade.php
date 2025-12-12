@@ -87,7 +87,7 @@
                     class="input" 
                     id="timestamp" 
                     name="timestamp" 
-                    value="{{ old('timestamp', now()->format('Y-m-d\TH:i')) }}" 
+                    value="{{ old('timestamp', now()->setTimezone('Asia/Manila')->format('Y-m-d\TH:i')) }}"
                     required
                 >
                 @error('timestamp')

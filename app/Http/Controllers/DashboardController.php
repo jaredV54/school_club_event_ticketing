@@ -56,7 +56,7 @@ class DashboardController extends Controller
                 })->count(),
             ];
 
-            $recent_events = Event::with('club')->latest()->take(10)->get();
+            $recent_events = Event::with('club')->where('is_hidden', false)->latest()->take(10)->get();
             $recent_registrations = EventRegistration::with('event', 'user')
                 ->where('user_id', $user->id)
                 ->latest()->take(10)->get();
